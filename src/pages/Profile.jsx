@@ -1,0 +1,179 @@
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { signOutUser } from "../lib/auth.js";
+import { getProfile, saveProfile } from "../lib/db.js";
+import { recalcMyRating } from "../lib/trades.js";
+import { logActivity } from "../lib/activity.js";
+
+function initials(name) {
+  const parts = name.trim().split(" ");
+  const first = parts[0].charAt(0);
+  const second = parts.length > 1 ? parts[1].charAt(0) : "";
+  return (first + second).toUpperCase();
+}
+
+function textToSkillArray(text) {
+  return text.split(",").map((s) => s.trim().toLowerCase()).filter((s) => s.length > 0);
+}
+
+function Profile() {
+  const navigate = useNavigate();
+
+  const [currentUser, setCurrentUser] = useState(null);
+  const [checked, setChecked] = useState(false);
+
+  const [offersInput, setOffersInput] = useState("");
+  const [needsInput, setNeedsInput] = useState("");
+  const [whatsappInput, setWhatsappInput] = useState("");
+
+  const [saveError, setSaveError] = useState("");
+  const [showSaved, setShowSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("currentUser");
+    if (stored === null) {
+      setChecked(true);
+      return;
+    }
+    const user = JSON.parse(stored);
+
+    recalcMyRating(user.uid).then(() => {
+      getProfile(user.uid).then((result) => {
+        const fresh = result.ok && result.data !== null
+          ? { uid: user.uid, ...result.data }
+          : user;
+        setCurrentUser(fresh);
+        setOffersInput(fresh.offers.join(", "));
+        setNeedsInput(fresh.needs.join(", "));
+        setWhatsappInput(fresh.whatsapp);
+        localStorage.setItem("currentUser", JSON.stringify(fresh));
+        setChecked(true);
+      });
+    });
+  }, []);
+
+  async function handleSave() {
+    setSaveError("");
+    setShowSaved(false);
+
+    const offers = textToSkillArray(offersInput);
+    const needs = textToSkillArray(needsInput);
+
+    if (offers.length === 0) {
+      setSaveError("List at least one skill you offer.");
+      return;
+    }
+
+    const digits = whatsappInput.replace(/\D/g, "");
+    const nigerianShape = /^(0[7-9][0-1]\d{8}|234[7-9][0-1]\d{8})$/;
+    if (nigerianShape.test(digits) === false) {
+      setSaveError("Enter a real Nigerian mobile number (e.g. 08012345678).");
+      return;
+    }
+
+    setSaving(true);
+    const updates = { offers, needs, whatsapp: digits };
+    const result = await saveProfile(currentUser.uid, updates);
+    setSaving(false);
+
+    if (result.ok === false) {
+      setSaveError(result.message);
+      return;
+    }
+
+    const updated = { ...currentUser, ...updates };
+    setCurrentUser(updated);
+    localStorage.setItem("currentUser", JSON.stringify(updated));
+    setShowSaved(true);
+
+    logActivity(currentUser.uid, "Your profile changes were saved successfully.");
+  }
+
+  async function handleSignOut() {
+    await signOutUser();
+    localStorage.removeItem("currentUser");
+    navigate("/");
+  }
+
+  return (
+    <div className="dash-shell profile-page">
+      <div className="app">
+        <header className="topbar">
+          <div className="topbar-inner">
+            <Link to="/dashboard" aria-label="Back to board">
+              <svg className="icon" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+            </Link>
+            <p className="title">My profile</p>
+          </div>
+        </header>
+        <div className="page-spacer"></div>
+
+        <div className="body">
+          {!checked && <div className="empty">Loading your profile...</div>}
+
+          {checked && currentUser === null && (
+            <div className="empty">
+              Sign in to view your profile. <br /><br />
+              <Link to="/signin" style={{ color: "var(--blue)", fontWeight: 700 }}>Sign in</Link>
+            </div>
+          )}
+
+          {checked && currentUser !== null && (
+            <>
+              <div className="profile-head">
+                <div className="avatar-lg">{initials(currentUser.name)}</div>
+                <p className="profile-name">{currentUser.name}</p>
+                <p className="profile-meta">{currentUser.institution} &middot; {currentUser.email}</p>
+                <div className="stat-row">
+                  <div className="stat"><p className="num">{currentUser.rating == null ? "New" : currentUser.rating}</p><p className="lbl">RATING</p></div>
+                  <div className="stat"><p className="num">{currentUser.trades || 0}</p><p className="lbl">TRADES</p></div>
+                </div>
+              </div>
+
+              <div className="card">
+                <h2 className="o">Skills you offer</h2>
+                <textarea rows="2" value={offersInput} onChange={(e) => setOffersInput(e.target.value)} />
+                <div className="tag-preview">
+                  {textToSkillArray(offersInput).map((s) => <span className="tag offer" key={s}>{s}</span>)}
+                </div>
+                <p className="hint">Separate with commas.</p>
+              </div>
+
+              <div className="card">
+                <h2 className="n">Skills you need</h2>
+                <textarea rows="2" value={needsInput} onChange={(e) => setNeedsInput(e.target.value)} />
+                <div className="tag-preview">
+                  {textToSkillArray(needsInput).map((s) => <span className="tag need" key={s}>{s}</span>)}
+                </div>
+                <p className="hint">Separate with commas. Optional.</p>
+              </div>
+
+              <div className="card">
+                <h2>WhatsApp number</h2>
+                <input type="tel" value={whatsappInput} onChange={(e) => setWhatsappInput(e.target.value)} />
+                <p className="hint">Only shared when you accept a trade. Never on your profile.</p>
+              </div>
+
+              <button className="btn btn-navy" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save changes"}</button>
+              {saveError && <p className="error" style={{ display: "block" }}>{saveError}</p>}
+              {showSaved && <p className="saved-note">Saved.</p>}
+
+              <button className="btn btn-outline" onClick={() => navigate("/trades")}>
+                <svg className="icon sm" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /></svg>
+                My trades
+              </button>
+
+              <button className="btn btn-danger-outline" onClick={handleSignOut}>
+                <svg className="icon sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                Sign out
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Profile;

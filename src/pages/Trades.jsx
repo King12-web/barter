@@ -236,7 +236,17 @@ function Trades() {
         {toast && <div className="toast-trades show">{toast}</div>}
       </div>
 
-      {verifyPromptOpen && (
+      {verifyPromptOpen && (() => {
+        /* Don't tell a brand-new signup "your link may have
+           expired" — that's simply false minutes after signup,
+           and it's confusing, wrong advice. Only shift toward
+           that framing once enough real time has actually
+           passed. 24 hours is a reasonable, simple threshold. */
+        const joinedMs = currentUser && currentUser.joined ? new Date(currentUser.joined).getTime() : 0;
+        const accountAgeMs = Date.now() - joinedMs;
+        const isFreshAccount = accountAgeMs < 24 * 60 * 60 * 1000;
+
+        return (
         <div style={{ display: "flex", position: "fixed", inset: 0, background: "rgba(4,56,115,0.45)", zIndex: 300, alignItems: "center", justifyContent: "center", padding: "20px" }}>
           <div style={{ background: "var(--card)", borderRadius: "16px", padding: "22px", width: "100%", maxWidth: "360px", textAlign: "center" }}>
             <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--need-bg)", color: "#A14E10", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
@@ -244,7 +254,9 @@ function Trades() {
             </div>
             <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "16px", fontWeight: 800, marginBottom: "8px" }}>Verify your email first</p>
             <p style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6, marginBottom: "16px" }}>
-              You need to verify your email before accepting a trade. If your first verification link is old, it may have expired — send a fresh one below.
+              {isFreshAccount
+                ? "You need to verify your email before accepting a trade. We sent a link to your inbox when you signed up, check there (and spam) for it. Still can't find it? Send a new one below."
+                : "You need to verify your email before accepting a trade. Your original link may have expired by now, send a fresh one below."}
             </p>
 
             {resendMessage && (
@@ -260,7 +272,8 @@ function Trades() {
               onClick={() => setVerifyPromptOpen(false)}>Close</button>
           </div>
         </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

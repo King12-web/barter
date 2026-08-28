@@ -378,7 +378,8 @@ function Join() {
                   ? "Welcome back, " + returningName + ". You're already set up."
                   : fullName.split(" ")[0] + ", we sent a verification link to your email. Verify it, then your board at " + institution + " is waiting."}
               </p>
-              <button className="btn btn-navy" onClick={() => navigate("/dashboard")}>Go to your board</button>
+              <button className="btn btn-navy" onClick={() => navigate("/signin")}>Sign in to continue</button>
+              <p className="hint" style={{ marginTop: "8px" }}>Signing in confirms your account works and checks your verification status.</p>
             </div>
           )}
 

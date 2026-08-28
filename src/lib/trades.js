@@ -51,7 +51,10 @@ async function setStatus(tradeId, status) {
     await updateDoc(doc(db, "trades", tradeId), { status, updatedAt: serverTimestamp() });
     return { ok: true };
   } catch (error) {
-    return { ok: false, message: "Something went wrong updating that trade." };
+    const message = error.code === "permission-denied"
+      ? "You don't have permission to do that yet. If you just verified your email, try again in a moment."
+      : "Something went wrong updating that trade. (" + error.code + ")";
+    return { ok: false, message };
   }
 }
 

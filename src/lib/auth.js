@@ -76,6 +76,18 @@ export async function isEmailVerified() {
   if (auth.currentUser === null) return false;
   try {
     await auth.currentUser.reload();
+
+    /* reload() updates the live user object (emailVerified flips
+       to true right away) but Firestore's rules read a DIFFERENT
+       thing: the email_verified CLAIM baked inside the auth
+       TOKEN, which doesn't refresh automatically. Without this
+       forced refresh, the app correctly shows "verified" while
+       Firestore is still looking at an old token that says
+       otherwise — rejecting the write with a confusing error. */
+    if (auth.currentUser.emailVerified) {
+      await auth.currentUser.getIdToken(true);
+    }
+
     return auth.currentUser.emailVerified;
   } catch (error) {
     return false;

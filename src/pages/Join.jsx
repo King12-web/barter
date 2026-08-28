@@ -200,6 +200,20 @@ function Join() {
     const currentUser = { uid: result.user.uid, ...profile };
     localStorage.setItem("currentUser", JSON.stringify(currentUser));
 
+    /* Fire-and-forget: a welcome email failing to send should
+       NEVER block someone from finishing signup. We don't await
+       this or check its result before showing the success screen —
+       worst case, they just don't get a welcome email, which is
+       far better than being stuck on a loading spinner because
+       of an email server hiccup. */
+    fetch("/api/send-welcome-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toEmail: profile.email, name: profile.name }),
+    }).catch((error) => {
+      console.error("Welcome email failed to send:", error);
+    });
+
     setLoadingStage(null);
     setStep("done");
   }

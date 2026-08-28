@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade } from "../lib/trades.js";
+import { isEmailVerified } from "../lib/auth.js";
 
 function isMatch(me, them) {
   const theyHelpMe = them.offers.some((s) => me.needs.includes(s));
@@ -65,7 +66,12 @@ function Matches() {
     ? allPeople.filter((p) => p.email !== currentUser.email && isMatch(currentUser, p))
     : [];
 
-  function openModal(person) {
+  async function openModal(person) {
+    const verified = await isEmailVerified();
+    if (verified === false) {
+      showToast("Verify your email to propose trades. Check your inbox for the link.");
+      return;
+    }
     setModalTarget(person);
     setProposeOffer(currentUser.offers[0] || "");
     setProposeNeed(person.offers[0] || "");

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
-import { signOutUser } from "../lib/auth.js";
+import { signOutUser, isEmailVerified } from "../lib/auth.js";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade, recalcMyRating } from "../lib/trades.js";
 
@@ -158,11 +158,22 @@ function Dashboard() {
       ? "People on your campus"
       : "People at " + viewInstitution;
 
-  function openProposeModal(person) {
+  async function openProposeModal(person) {
     if (currentUser === null) {
       showToast("Join the board first to propose a trade");
       return;
     }
+
+    /* UX-layer check — the real enforcement lives in
+       firestore.rules (email_verified required to create a
+       trade). This just gives a clear message instead of a
+       confusing permission error. */
+    const verified = await isEmailVerified();
+    if (verified === false) {
+      showToast("Verify your email to propose trades. Check your inbox for the link.");
+      return;
+    }
+
     setProposeTarget(person);
     setProposeOffer(currentUser.offers[0] || "");
     setProposeNeed(person.offers[0] || "");

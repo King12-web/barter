@@ -56,3 +56,45 @@ export async function signOutUser() {
     return { ok: false, message: friendly(error) };
   }
 }
+
+/* ============================================================
+   Live verification check — used right before a trade-committing
+   action (propose, accept). Deliberately calls .reload() first
+   instead of trusting whatever emailVerified said at sign-in time:
+   if someone verifies their email in another tab, then comes back
+   here, this check must see the FRESH status, not a stale cached
+   one from login.
+
+   NOTE: this is a UX convenience, not the real security boundary.
+   The actual enforcement lives in firestore.rules, which requires
+   request.auth.token.email_verified == true to CREATE a trade —
+   that's the part nothing can bypass. This just gives a clear,
+   friendly message before a user hits a confusing permission
+   error from Firestore.
+   ============================================================ */
+export async function isEmailVerified() {
+  if (auth.currentUser === null) return false;
+  try {
+    await auth.currentUser.reload();
+    return auth.currentUser.emailVerified;
+  } catch (error) {
+    return false;
+  }
+}
+
+/* ============================================================
+   Resend the verification email. Verification links can go stale
+   after a few days, so if a user's first email is lost or expired,
+   this gives them a fresh one on demand instead of a dead end.
+   ============================================================ */
+export async function resendVerificationEmail() {
+  if (auth.currentUser === null) {
+    return { ok: false, message: "You need to be signed in to resend a verification email." };
+  }
+  try {
+    await sendEmailVerification(auth.currentUser);
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, message: friendly(error) };
+  }
+}

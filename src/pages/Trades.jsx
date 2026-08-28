@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   getMyTrades, acceptTrade, declineTrade, completeTrade, rateTrade, recalcMyRating,
 } from "../lib/trades.js";
+import { isEmailVerified, resendVerificationEmail } from "../lib/auth.js";
 
 function initials(name) {
   const parts = name.trim().split(" ");
@@ -120,6 +121,10 @@ function Trades() {
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
 
+  const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState("");
+
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
     if (stored !== null) setCurrentUser(JSON.parse(stored));
@@ -145,8 +150,26 @@ function Trades() {
     toastTimer.current = setTimeout(() => setToast(""), 2400);
   }
 
-  function handleAccept(id) {
+  async function handleAccept(id) {
+    /* live check — same reasoning as propose: someone could have
+       verified in another tab moments ago, so we check fresh
+       instead of trusting stale data */
+    const verified = await isEmailVerified();
+    if (verified === false) {
+      setResendMessage("");
+      setVerifyPromptOpen(true);
+      return;
+    }
     acceptTrade(id).then((r) => { showToast(r.ok ? "Trade accepted" : r.message); loadTrades(); });
+  }
+
+  async function handleResendVerification() {
+    setResending(true);
+    const result = await resendVerificationEmail();
+    setResending(false);
+    setResendMessage(result.ok
+      ? "Verification email sent. Check your inbox (and spam folder)."
+      : result.message);
   }
   function handleDecline(id) {
     declineTrade(id).then((r) => { showToast(r.ok ? "Trade declined" : r.message); loadTrades(); });
@@ -212,6 +235,32 @@ function Trades() {
 
         {toast && <div className="toast-trades show">{toast}</div>}
       </div>
+
+      {verifyPromptOpen && (
+        <div style={{ display: "flex", position: "fixed", inset: 0, background: "rgba(4,56,115,0.45)", zIndex: 300, alignItems: "center", justifyContent: "center", padding: "20px" }}>
+          <div style={{ background: "var(--card)", borderRadius: "16px", padding: "22px", width: "100%", maxWidth: "360px", textAlign: "center" }}>
+            <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--need-bg)", color: "#A14E10", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+              <svg className="icon" viewBox="0 0 24 24"><path d="M22 2 11 13" /><path d="M22 2 15 22 11 13 2 9 22 2z" /></svg>
+            </div>
+            <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "16px", fontWeight: 800, marginBottom: "8px" }}>Verify your email first</p>
+            <p style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6, marginBottom: "16px" }}>
+              You need to verify your email before accepting a trade. If your first verification link is old, it may have expired — send a fresh one below.
+            </p>
+
+            {resendMessage && (
+              <p style={{ fontSize: "12.5px", color: resendMessage.startsWith("Verification email sent") ? "var(--offer)" : "var(--danger)", marginBottom: "14px", fontWeight: 600 }}>
+                {resendMessage}
+              </p>
+            )}
+
+            <button className="btn btn-navy" onClick={handleResendVerification} disabled={resending}>
+              {resending ? "Sending..." : "Resend verification email"}
+            </button>
+            <button className="btn" style={{ background: "transparent", color: "var(--muted)", marginTop: "8px" }}
+              onClick={() => setVerifyPromptOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

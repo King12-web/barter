@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function FeatureCampus() {
   return (
     <section className="band-soft" id="campus">
@@ -18,7 +20,7 @@ function FeatureCampus() {
             to other campuses whenever you want; remote-friendly skills
             travel, in-person ones stay honest about distance.
           </p>
-          <a className="btn btn-blue" href="/join">Join your campus board</a>
+          <Link className="btn btn-blue" to="/join">Join your campus board</Link>
         </div>
         <div className="f-art">
           {/* orbit illustration */}

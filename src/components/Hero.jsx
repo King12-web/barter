@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Hero() {
   return (
     <div className="hero-band">
@@ -25,14 +27,14 @@ function Hero() {
               what you need, matched right on your campus.
             </p>
             <div className="cta-row">
-              <a className="btn btn-yellow" href="/join">
+              <Link className="btn btn-yellow" to="/join">
                 Join the board
                 <svg className="icon" style={{ width: "16px", height: "16px" }} viewBox="0 0 24 24">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
-              </a>
-              <a className="btn btn-ghost-dark" href="/signin">Sign in</a>
+              </Link>
+              <Link className="btn btn-ghost-dark" to="/signin">Sign in</Link>
             </div>
             <p className="hero-proof">
               <svg className="icon" style={{ width: "15px", height: "15px", color: "var(--yellow)" }} viewBox="0 0 24 24">

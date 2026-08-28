@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { signOutUser } from "../lib/auth.js";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade, recalcMyRating } from "../lib/trades.js";
@@ -264,7 +264,7 @@ function Dashboard() {
         <div className="body">
           {currentUser === null && (
             <div className="banner">
-              You are browsing as a guest. Open the onboarding page (<a href="/join">join</a>) to join the board, or <a href="/signin">sign in</a> if you already have.
+              You are browsing as a guest. Open the onboarding page (<Link to="/join">join</Link>) to join the board, or <Link to="/signin">sign in</Link> if you already have.
             </div>
           )}
 

@@ -7,6 +7,7 @@ import Matches from "./pages/Matches.jsx";
 import Trades from "./pages/Trades.jsx";
 import Profile from "./pages/Profile.jsx";
 import Notifications from "./pages/Notifications.jsx";
+import AuthAction from "./pages/AuthAction.jsx";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path="/trades" element={<Trades />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/notifications" element={<Notifications />} />
+      <Route path="/auth-action" element={<AuthAction />} />
     </Routes>
   );
 }

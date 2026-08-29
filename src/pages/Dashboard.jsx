@@ -213,14 +213,12 @@ function Dashboard() {
 
         <header className="topbar">
           <div className="topbar-inner">
-            <span className="brand-mark">
-              <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg>
-            </span>
-
-            <button className="inst-switch" onClick={() => setSwitcherOpen((o) => !o)}>
-              <span>{viewingAll ? "All campuses" : viewInstitution}</span>
-              <svg className="icon sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
-            </button>
+            <div className="dash-brand">
+              <span className="brand-mark">
+                <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg>
+              </span>
+              <p className="dash-brand-name">Campus <span>Barter</span></p>
+            </div>
 
             <nav className="desktop-nav" aria-label="Main">
               <button className="active">
@@ -241,38 +239,46 @@ function Dashboard() {
               </button>
             </nav>
 
-            <button className="iconbtn" aria-label="Notifications" onClick={() => navigate("/notifications")}>
-              <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
-            </button>
-
-            {currentUser !== null && (
-              <button className="iconbtn" aria-label="Sign out" onClick={handleSignOut}>
-                <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+            <div className="topbar-actions">
+              <button className="iconbtn" aria-label="Notifications" onClick={() => navigate("/notifications")}>
+                <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
               </button>
-            )}
-          </div>
 
-          {switcherOpen && (
-            <select
-              className="open"
-              id="instSelect"
-              value={viewInstitution || ""}
-              onChange={(e) => switchInstitution(e.target.value)}
-            >
               {currentUser !== null && (
-                <option value={currentUser.institution}>My campus — {currentUser.institution}</option>
+                <button className="iconbtn" aria-label="Sign out" onClick={handleSignOut}>
+                  <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                </button>
               )}
-              <option value="__ALL__">All campuses (wider search)</option>
-              {viewInstitution !== "__ALL__" && (currentUser === null || viewInstitution !== currentUser.institution) && (
-                <option value={viewInstitution}>{viewInstitution}</option>
-              )}
-            </select>
-          )}
+            </div>
+          </div>
         </header>
 
         <div className="page-spacer"></div>
 
         <div className="body">
+          <div className="campus-picker">
+            <button className="campus-picker-btn" onClick={() => setSwitcherOpen((o) => !o)}>
+              <span>{viewingAll ? "All campuses" : viewInstitution}</span>
+              <svg className="icon sm" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9" /></svg>
+            </button>
+
+            {switcherOpen && (
+              <select
+                className="open"
+                value={viewInstitution || ""}
+                onChange={(e) => switchInstitution(e.target.value)}
+              >
+                {currentUser !== null && (
+                  <option value={currentUser.institution}>My campus — {currentUser.institution}</option>
+                )}
+                <option value="__ALL__">All campuses (wider search)</option>
+                {viewInstitution !== "__ALL__" && (currentUser === null || viewInstitution !== currentUser.institution) && (
+                  <option value={viewInstitution}>{viewInstitution}</option>
+                )}
+              </select>
+            )}
+          </div>
+
           {currentUser === null && (
             <div className="banner">
               You are browsing as a guest. Open the onboarding page (<Link to="/join">join</Link>) to join the board, or <Link to="/signin">sign in</Link> if you already have.
@@ -359,8 +365,8 @@ function Dashboard() {
                       <div className={"avatar " + AV_CLASSES[i % AV_CLASSES.length]}>{initials(v.person.name)}</div>
                       <div>
                         <p className="name">{v.person.name}</p>
+                        <p className="institution-line">{v.person.institution}</p>
                         <p className="meta">
-                          {v.person.institution} &middot;{" "}
                           <svg className="icon sm fill" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>{" "}
                           {v.person.rating == null ? "New" : v.person.rating.toFixed(1)} &middot; {v.person.trades || 0} trades
                         </p>
@@ -370,7 +376,7 @@ function Dashboard() {
                       <div className="skill-panel o"><p className="skill-panel-label">OFFERS</p><p className="skill-panel-list">{v.shownOffers.join(", ")}</p></div>
                       <div className="skill-panel n"><p className="skill-panel-label">NEEDS</p><p className="skill-panel-list">{v.person.needs.length > 0 ? v.person.needs.join(", ") : "nothing listed"}</p></div>
                     </div>
-                    <button className="btn btn-outline" onClick={() => openProposeModal(v.person)}>Propose swap</button>
+                    <button className="btn btn-blue" onClick={() => openProposeModal(v.person)}>Propose swap</button>
                   </div>
                 ))}
               </div>

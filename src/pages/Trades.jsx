@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import AppNav from "../components/AppNav.jsx";
 import {
   getMyTrades, acceptTrade, declineTrade, completeTrade, rateTrade, recalcMyRating,
 } from "../lib/trades.js";
@@ -201,6 +202,7 @@ function Trades() {
             <p className="title">My trades</p>
           </div>
         </header>
+        <AppNav active="trades" />
         <div className="page-spacer"></div>
 
         <div className="body">

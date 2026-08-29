@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 import Landing from "./pages/Landing.jsx";
 import Join from "./pages/Join.jsx";
 import SignIn from "./pages/SignIn.jsx";
@@ -11,17 +12,20 @@ import AuthAction from "./pages/AuthAction.jsx";
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Landing />} />
-      <Route path="/join" element={<Join />} />
-      <Route path="/signin" element={<SignIn />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/matches" element={<Matches />} />
-      <Route path="/trades" element={<Trades />} />
-      <Route path="/profile" element={<Profile />} />
-      <Route path="/notifications" element={<Notifications />} />
-      <Route path="/auth-action" element={<AuthAction />} />
-    </Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/join" element={<Join />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/matches" element={<Matches />} />
+        <Route path="/trades" element={<Trades />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/auth-action" element={<AuthAction />} />
+      </Routes>
+    </>
   );
 }
 

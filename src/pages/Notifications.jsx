@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import AppNav from "../components/AppNav.jsx";
 import { getMyTrades } from "../lib/trades.js";
 import { getMyActivity } from "../lib/activity.js";
 
@@ -114,6 +115,7 @@ function Notifications() {
             <p className="title">Notifications</p>
           </div>
         </header>
+        <AppNav active="" />
         <div className="page-spacer"></div>
 
         <div className="body">

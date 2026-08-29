@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import AppNav from "../components/AppNav.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
@@ -109,6 +110,7 @@ function Matches() {
             <p className="title">Matches</p>
           </div>
         </header>
+        <AppNav active="matches" />
         <div className="page-spacer"></div>
 
         <div className="body">

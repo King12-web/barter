@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AppNav from "../components/AppNav.jsx";
 import { signOutUser } from "../lib/auth.js";
 import { getProfile, saveProfile } from "../lib/db.js";
 import { recalcMyRating } from "../lib/trades.js";
@@ -107,6 +108,7 @@ function Profile() {
             <p className="title">My profile</p>
           </div>
         </header>
+        <AppNav active="profile" />
         <div className="page-spacer"></div>
 
         <div className="body">

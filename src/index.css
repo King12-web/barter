@@ -1197,3 +1197,30 @@ footer .ft-green {
   pointer-events: none; z-index: 200;
 }
 .toast-matches.show { opacity: 1; }
+/* ================= SHARED APP NAV (secondary pages) ================= */
+/* Append to the bottom of src/index.css */
+
+.app-nav-desktop { display: none; }
+
+@media (min-width: 900px) {
+  .app-nav-desktop {
+    display: block;
+    background: var(--navy);
+  }
+  .app-nav-desktop-inner {
+    display: flex;
+    gap: 4px;
+    padding: 8px 22px;
+    max-width: 900px;
+  }
+  .app-nav-desktop-inner button {
+    display: flex; align-items: center; gap: 6px;
+    background: none; border: none; cursor: pointer;
+    font-family: inherit; font-size: 12.5px; font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    padding: 8px 12px; border-radius: 8px;
+  }
+  .app-nav-desktop-inner button:hover { background: rgba(255, 255, 255, 0.1); color: #FFFFFF; }
+  .app-nav-desktop-inner button.active { background: rgba(255, 255, 255, 0.14); color: #FFFFFF; }
+  .app-nav-desktop-inner .icon { width: 16px; height: 16px; }
+}

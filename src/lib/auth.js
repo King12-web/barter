@@ -7,6 +7,19 @@ import {
 } from "firebase/auth";
 import { auth } from "../firebase.js";
 
+/* ============================================================
+   By default, Firebase generates verification/reset links that
+   point to ITS OWN generic hosted page. Passing this settings
+   object with handleCodeInApp: true makes it generate links
+   pointing at OUR page instead — the one built to match our
+   design and handle both link types. This is controlled entirely
+   in code, no Firebase console setting involved.
+   ============================================================ */
+const actionCodeSettings = {
+  url: "https://campusbarter.online/auth-action",
+  handleCodeInApp: true,
+};
+
 const FRIENDLY = {
   "auth/email-already-in-use": "An account with this email already exists. Try signing in instead.",
   "auth/invalid-email": "That email address doesn't look right. Check it and try again.",
@@ -32,7 +45,7 @@ export async function signIn(email, password) {
 export async function signUp(email, password) {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    await sendEmailVerification(result.user);
+    await sendEmailVerification(result.user, actionCodeSettings);
     return { ok: true, user: result.user };
   } catch (error) {
     return { ok: false, message: friendly(error) };
@@ -41,7 +54,7 @@ export async function signUp(email, password) {
 
 export async function resetPassword(email) {
   try {
-    await sendPasswordResetEmail(auth, email);
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
     return { ok: true };
   } catch (error) {
     return { ok: false, message: friendly(error) };
@@ -104,7 +117,7 @@ export async function resendVerificationEmail() {
     return { ok: false, message: "You need to be signed in to resend a verification email." };
   }
   try {
-    await sendEmailVerification(auth.currentUser);
+    await sendEmailVerification(auth.currentUser, actionCodeSettings);
     return { ok: true };
   } catch (error) {
     return { ok: false, message: friendly(error) };

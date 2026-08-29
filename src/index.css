@@ -1286,3 +1286,18 @@ footer .ft-green {
 .nav-item { color: rgba(255, 255, 255, 0.7); border-radius: 9px; padding: 6px 10px; }
 .nav-item.active { background: rgba(255, 255, 255, 0.14); color: #FFFFFF; }
 .nav-item.active .icon { color: #FFFFFF; }
+/* ================= ZOOM FIX: 16px minimum on every field ================= */
+/* iOS Safari auto-zooms the whole page when focusing any input
+   below 16px font-size — this is a built-in browser behavior, not
+   a bug. Since our SPA never fully reloads the page, that zoomed
+   state carries forward across navigation instead of resetting,
+   which is why sign-in could leave the Dashboard looking zoomed
+   in. Fix: every field sitewide sits at 16px minimum. These rules
+   are MORE SPECIFIC than the originals (class selectors, same as
+   before) and come LATER in the file, so they win the cascade —
+   append this to the very bottom of index.css. */
+
+.form-card input { font-size: 16px; }
+.profile-page input, .profile-page textarea { font-size: 16px; }
+.search-wrap input { font-size: 16px; }
+.campus-picker select.open { font-size: 16px; }

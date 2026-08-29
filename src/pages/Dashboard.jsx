@@ -44,6 +44,7 @@ function Dashboard() {
 
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
+  const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
 
   /* ---- propose modal state ---- */
   const [proposeTarget, setProposeTarget] = useState(null);
@@ -112,7 +113,12 @@ function Dashboard() {
     setRemoteOnly((r) => !r);
   }
 
-  async function handleSignOut() {
+  function requestSignOut() {
+    setSignOutConfirmOpen(true);
+  }
+
+  async function confirmSignOut() {
+    setSignOutConfirmOpen(false);
     await signOutUser();
     localStorage.removeItem("currentUser");
     navigate("/");
@@ -245,7 +251,7 @@ function Dashboard() {
               </button>
 
               {currentUser !== null && (
-                <button className="iconbtn" aria-label="Sign out" onClick={handleSignOut}>
+                <button className="iconbtn" aria-label="Sign out" onClick={requestSignOut}>
                   <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
                 </button>
               )}
@@ -413,20 +419,20 @@ function Dashboard() {
               <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "16px", fontWeight: 800, marginBottom: "14px" }}>Propose a swap with {proposeTarget.name}</p>
 
               <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: "#0F6E56", marginBottom: "6px" }}>YOUR SKILL</label>
-              <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "13px", marginBottom: "14px" }}
+              <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "16px", marginBottom: "14px" }}
                 value={proposeOffer} onChange={(e) => setProposeOffer(e.target.value)}>
                 {currentUser.offers.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
 
               <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: "#A14E10", marginBottom: "6px" }}>THEIR SKILL</label>
-              <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "13px", marginBottom: "14px" }}
+              <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "16px", marginBottom: "14px" }}
                 value={proposeNeed} onChange={(e) => setProposeNeed(e.target.value)}>
                 {proposeTarget.offers.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
 
               <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: "var(--muted)", marginBottom: "6px" }}>TERMS (OPTIONAL)</label>
               <textarea rows="2" placeholder="e.g. I'll redesign your CV, you fix my laptop."
-                style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "13px", resize: "vertical", marginBottom: "6px" }}
+                style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "16px", resize: "vertical", marginBottom: "6px" }}
                 value={proposeTerms} onChange={(e) => setProposeTerms(e.target.value)} />
               {proposeError && <p className="error" style={{ display: "block", marginBottom: "10px" }}>{proposeError}</p>}
 
@@ -434,6 +440,23 @@ function Dashboard() {
                 {proposeSending ? "Sending..." : "Send proposal"}
               </button>
               <button className="btn" style={{ background: "transparent", color: "var(--muted)", marginTop: "8px" }} onClick={closeProposeModal}>Cancel</button>
+            </div>
+          </div>
+        )}
+
+        {signOutConfirmOpen && (
+          <div style={{ display: "flex", position: "fixed", inset: 0, background: "rgba(4,56,115,0.45)", zIndex: 300, alignItems: "center", justifyContent: "center", padding: "20px" }}>
+            <div style={{ background: "var(--card)", borderRadius: "16px", padding: "22px", width: "100%", maxWidth: "340px", textAlign: "center" }}>
+              <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--need-bg)", color: "#A14E10", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+                <svg className="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+              </div>
+              <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "16px", fontWeight: 800, marginBottom: "8px" }}>Sign out?</p>
+              <p style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6, marginBottom: "18px" }}>
+                You'll need to sign in again to see your matches and trades.
+              </p>
+              <button className="btn btn-navy" onClick={confirmSignOut}>Yes, sign out</button>
+              <button className="btn" style={{ background: "transparent", color: "var(--muted)", marginTop: "8px" }}
+                onClick={() => setSignOutConfirmOpen(false)}>Cancel</button>
             </div>
           </div>
         )}

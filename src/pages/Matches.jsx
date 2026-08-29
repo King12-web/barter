@@ -165,20 +165,20 @@ function Matches() {
             <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "16px", fontWeight: 800, marginBottom: "14px" }}>Propose a swap with {modalTarget.name}</p>
 
             <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: "#0F6E56", marginBottom: "6px" }}>YOUR SKILL</label>
-            <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "13px", marginBottom: "14px" }}
+            <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "16px", marginBottom: "14px" }}
               value={proposeOffer} onChange={(e) => setProposeOffer(e.target.value)}>
               {currentUser.offers.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
 
             <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: "#A14E10", marginBottom: "6px" }}>THEIR SKILL</label>
-            <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "13px", marginBottom: "14px" }}
+            <select style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "16px", marginBottom: "14px" }}
               value={proposeNeed} onChange={(e) => setProposeNeed(e.target.value)}>
               {modalTarget.offers.map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
 
             <label style={{ display: "block", fontSize: "11px", fontWeight: 800, color: "var(--muted)", marginBottom: "6px" }}>TERMS (OPTIONAL)</label>
             <textarea rows="2" placeholder="e.g. I'll redesign your CV, you fix my laptop."
-              style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "13px", resize: "vertical", marginBottom: "6px" }}
+              style={{ width: "100%", border: "1.5px solid var(--line)", borderRadius: "9px", padding: "11px", fontFamily: "inherit", fontSize: "16px", resize: "vertical", marginBottom: "6px" }}
               value={proposeTerms} onChange={(e) => setProposeTerms(e.target.value)} />
             {proposeError && <p className="error" style={{ display: "block", marginBottom: "8px" }}>{proposeError}</p>}
 

@@ -1224,3 +1224,19 @@ footer .ft-green {
   .app-nav-desktop-inner button.active { background: rgba(255, 255, 255, 0.14); color: #FFFFFF; }
   .app-nav-desktop-inner .icon { width: 16px; height: 16px; }
 }
+/* ================= MOBILE FIXES (append to bottom of index.css) ================= */
+
+@media (max-width: 620px) {
+  /* "Join your campus board" (Feature 2) should feel the same as
+     the hero's full-width stacked button on mobile — right now
+     it's only as wide as its own text. */
+  .f-copy .btn { display: block; width: 100%; text-align: center; }
+}
+
+@media (max-width: 899px) {
+  /* Feature rows go single-column below 900px. The match
+     animation should center itself whenever that happens, so it
+     stays visually balanced with the illustration stacked
+     underneath it — not just on the narrowest phones. */
+  .match-anim { display: flex; justify-content: center; }
+}

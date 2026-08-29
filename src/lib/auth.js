@@ -45,7 +45,20 @@ export async function signIn(email, password) {
 export async function signUp(email, password) {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
-    await sendEmailVerification(result.user, actionCodeSettings);
+
+    /* Sending the verification email is important, but SECONDARY.
+       The account already exists at this point — if the email
+       send fails (e.g. a misconfigured link, a network hiccup),
+       that must NOT make this whole function report failure.
+       Otherwise the caller thinks signup failed, never creates
+       the Firestore profile, and the person is left with a real
+       but orphaned account and no way to retry with that email. */
+    try {
+      await sendEmailVerification(result.user, actionCodeSettings);
+    } catch (verifyError) {
+      console.error("Verification email failed to send:", verifyError);
+    }
+
     return { ok: true, user: result.user };
   } catch (error) {
     return { ok: false, message: friendly(error) };

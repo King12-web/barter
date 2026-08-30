@@ -68,6 +68,7 @@ function tradeToEntry(t, uid) {
 }
 
 function Notifications() {
+  useEffect(() => { document.title = "Notifications | Campus Barter"; }, []);
   const [currentUser, setCurrentUser] = useState(null);
   const [checked, setChecked] = useState(false);
   const [entries, setEntries] = useState([]);

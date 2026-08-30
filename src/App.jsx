@@ -9,6 +9,9 @@ import Trades from "./pages/Trades.jsx";
 import Profile from "./pages/Profile.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import AuthAction from "./pages/AuthAction.jsx";
+import NotFound from "./pages/NotFound.jsx";
+import Terms from "./pages/Terms.jsx";
+import Privacy from "./pages/Privacy.jsx";
 
 function App() {
   return (
@@ -24,6 +27,9 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/auth-action" element={<AuthAction />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

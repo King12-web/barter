@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { signOutUser, isEmailVerified } from "../lib/auth.js";
+import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade, recalcMyRating } from "../lib/trades.js";
+import { isMatch, overlap } from "../lib/matcher.js";
 
 const IN_PERSON = [
   "laptop repair", "phone repair", "haircut", "barbing",
@@ -17,17 +19,10 @@ function initials(name) {
   const second = parts.length > 1 ? parts[1].charAt(0) : "";
   return (first + second).toUpperCase();
 }
-function isMatch(me, them) {
-  const theyHelpMe = them.offers.some((s) => me.needs.includes(s));
-  const iHelpThem = me.offers.some((s) => them.needs.includes(s));
-  return theyHelpMe && iHelpThem;
-}
-function overlap(offersA, needsB) {
-  return offersA.filter((s) => needsB.includes(s));
-}
 const AV_CLASSES = ["av-0", "av-1", "av-2"];
 
 function Dashboard() {
+  useEffect(() => { document.title = "The Board | Campus Barter"; }, []);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const showVerifyBanner = searchParams.get("verify") === "1";
@@ -45,6 +40,7 @@ function Dashboard() {
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
+  const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
 
   /* ---- propose modal state ---- */
   const [proposeTarget, setProposeTarget] = useState(null);
@@ -176,7 +172,7 @@ function Dashboard() {
        confusing permission error. */
     const verified = await isEmailVerified();
     if (verified === false) {
-      showToast("Verify your email to propose trades. Check your inbox for the link.");
+      setVerifyPromptOpen(true);
       return;
     }
 
@@ -460,6 +456,12 @@ function Dashboard() {
             </div>
           </div>
         )}
+
+        <VerifyEmailModal
+          open={verifyPromptOpen}
+          currentUser={currentUser}
+          onClose={() => setVerifyPromptOpen(false)}
+        />
 
       </div>
     </div>

@@ -4,7 +4,8 @@ import AppNav from "../components/AppNav.jsx";
 import {
   getMyTrades, acceptTrade, declineTrade, completeTrade, rateTrade, recalcMyRating,
 } from "../lib/trades.js";
-import { isEmailVerified, resendVerificationEmail } from "../lib/auth.js";
+import { isEmailVerified } from "../lib/auth.js";
+import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
 
 function initials(name) {
   const parts = name.trim().split(" ");
@@ -114,6 +115,7 @@ function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendin
 }
 
 function Trades() {
+  useEffect(() => { document.title = "My Trades | Campus Barter"; }, []);
   const [currentUser, setCurrentUser] = useState(null);
   const [checked, setChecked] = useState(false);
   const [allTrades, setAllTrades] = useState([]);
@@ -123,8 +125,6 @@ function Trades() {
   const toastTimer = useRef(null);
 
   const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
-  const [resending, setResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
@@ -164,14 +164,6 @@ function Trades() {
     acceptTrade(id).then((r) => { showToast(r.ok ? "Trade accepted" : r.message); loadTrades(); });
   }
 
-  async function handleResendVerification() {
-    setResending(true);
-    const result = await resendVerificationEmail();
-    setResending(false);
-    setResendMessage(result.ok
-      ? "Verification email sent. Check your inbox (and spam folder)."
-      : result.message);
-  }
   function handleDecline(id) {
     declineTrade(id).then((r) => { showToast(r.ok ? "Trade declined" : r.message); loadTrades(); });
   }
@@ -238,44 +230,11 @@ function Trades() {
         {toast && <div className="toast-trades show">{toast}</div>}
       </div>
 
-      {verifyPromptOpen && (() => {
-        /* Don't tell a brand-new signup "your link may have
-           expired" — that's simply false minutes after signup,
-           and it's confusing, wrong advice. Only shift toward
-           that framing once enough real time has actually
-           passed. 24 hours is a reasonable, simple threshold. */
-        const joinedMs = currentUser && currentUser.joined ? new Date(currentUser.joined).getTime() : 0;
-        const accountAgeMs = Date.now() - joinedMs;
-        const isFreshAccount = accountAgeMs < 24 * 60 * 60 * 1000;
-
-        return (
-        <div style={{ display: "flex", position: "fixed", inset: 0, background: "rgba(4,56,115,0.45)", zIndex: 300, alignItems: "center", justifyContent: "center", padding: "20px" }}>
-          <div style={{ background: "var(--card)", borderRadius: "16px", padding: "22px", width: "100%", maxWidth: "360px", textAlign: "center" }}>
-            <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--need-bg)", color: "#A14E10", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-              <svg className="icon" viewBox="0 0 24 24"><path d="M22 2 11 13" /><path d="M22 2 15 22 11 13 2 9 22 2z" /></svg>
-            </div>
-            <p style={{ fontFamily: "'DM Sans',sans-serif", fontSize: "16px", fontWeight: 800, marginBottom: "8px" }}>Verify your email first</p>
-            <p style={{ fontSize: "13px", color: "var(--muted)", lineHeight: 1.6, marginBottom: "16px" }}>
-              {isFreshAccount
-                ? "You need to verify your email before accepting a trade. We sent a link to your inbox when you signed up, check there (and spam) for it. Still can't find it? Send a new one below."
-                : "You need to verify your email before accepting a trade. Your original link may have expired by now, send a fresh one below."}
-            </p>
-
-            {resendMessage && (
-              <p style={{ fontSize: "12.5px", color: resendMessage.startsWith("Verification email sent") ? "var(--offer)" : "var(--danger)", marginBottom: "14px", fontWeight: 600 }}>
-                {resendMessage}
-              </p>
-            )}
-
-            <button className="btn btn-navy" onClick={handleResendVerification} disabled={resending}>
-              {resending ? "Sending..." : "Resend verification email"}
-            </button>
-            <button className="btn" style={{ background: "transparent", color: "var(--muted)", marginTop: "8px" }}
-              onClick={() => setVerifyPromptOpen(false)}>Close</button>
-          </div>
-        </div>
-        );
-      })()}
+      <VerifyEmailModal
+        open={verifyPromptOpen}
+        currentUser={currentUser}
+        onClose={() => setVerifyPromptOpen(false)}
+      />
     </div>
   );
 }

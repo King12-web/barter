@@ -12,6 +12,7 @@ function textToSkillArray(text) {
 }
 
 function Join() {
+  useEffect(() => { document.title = "Join the Board | Campus Barter"; }, []);
   const navigate = useNavigate();
 
   // ---- which step is showing, or "done" for the success screen ----
@@ -48,6 +49,8 @@ function Join() {
   const [signupError, setSignupError] = useState("");
 
   const [loadingStage, setLoadingStage] = useState(null); // null | "creating" | "saving"
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreeError, setAgreeError] = useState(false);
 
   /* ============================================================
      useEffect #1 — runs once when the page first loads.
@@ -168,6 +171,13 @@ function Join() {
 
   async function handleSubmit() {
     setSignupError("");
+    setAgreeError(false);
+
+    if (agreedToTerms === false) {
+      setAgreeError(true);
+      return;
+    }
+
     setLoadingStage("creating");
 
     const result = await signUp(email.trim().toLowerCase(), password);
@@ -372,6 +382,22 @@ function Join() {
               <div className="tag-preview">
                 {textToSkillArray(needsInput).map((s) => <span className="tag need" key={s}>{s}</span>)}
               </div>
+
+              <label style={{ display: "flex", alignItems: "flex-start", gap: "9px", fontSize: "12.5px", color: "var(--muted)", fontWeight: 400, marginTop: "18px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => { setAgreedToTerms(e.target.checked); setAgreeError(false); }}
+                  style={{ width: "16px", height: "16px", marginTop: "2px", flexShrink: 0 }}
+                />
+                <span>
+                  I agree to Campus Barter's{" "}
+                  <Link to="/terms" target="_blank" style={{ color: "var(--blue)", fontWeight: 600 }}>Terms of Service</Link>{" "}
+                  and{" "}
+                  <Link to="/privacy" target="_blank" style={{ color: "var(--blue)", fontWeight: 600 }}>Privacy Policy</Link>.
+                </span>
+              </label>
+              {agreeError && <p className="error" style={{ display: "block", marginTop: "6px" }}>Please agree to the Terms and Privacy Policy to continue.</p>}
 
               <button className="btn btn-yellow" onClick={handleSubmit} disabled={loadingStage !== null}>{joinBtnText}</button>
               {signupError && <p className="error" style={{ display: "block", marginTop: "12px" }}>{signupError}</p>}

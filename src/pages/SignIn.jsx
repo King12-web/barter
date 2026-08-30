@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { signIn, resetPassword } from "../lib/auth.js";
 import { getProfile } from "../lib/db.js";
 
 function SignIn() {
   const navigate = useNavigate();
+  useEffect(() => { document.title = "Sign In | Campus Barter"; }, []);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

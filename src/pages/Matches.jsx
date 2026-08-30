@@ -4,15 +4,9 @@ import AppNav from "../components/AppNav.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
+import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import { isMatch, overlap } from "../lib/matcher.js";
 
-function isMatch(me, them) {
-  const theyHelpMe = them.offers.some((s) => me.needs.includes(s));
-  const iHelpThem = me.offers.some((s) => them.needs.includes(s));
-  return theyHelpMe && iHelpThem;
-}
-function overlap(offersA, needsB) {
-  return offersA.filter((s) => needsB.includes(s));
-}
 function initials(name) {
   const parts = name.trim().split(" ");
   const first = parts[0].charAt(0);
@@ -21,6 +15,7 @@ function initials(name) {
 }
 
 function Matches() {
+  useEffect(() => { document.title = "Matches | Campus Barter"; }, []);
   const [currentUser, setCurrentUser] = useState(null);
   const [checked, setChecked] = useState(false);
   const [scope, setScope] = useState("campus");
@@ -31,6 +26,7 @@ function Matches() {
   const toastTimer = useRef(null);
 
   const [modalTarget, setModalTarget] = useState(null);
+  const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
   const [proposeOffer, setProposeOffer] = useState("");
   const [proposeNeed, setProposeNeed] = useState("");
   const [proposeTerms, setProposeTerms] = useState("");
@@ -70,7 +66,7 @@ function Matches() {
   async function openModal(person) {
     const verified = await isEmailVerified();
     if (verified === false) {
-      showToast("Verify your email to propose trades. Check your inbox for the link.");
+      setVerifyPromptOpen(true);
       return;
     }
     setModalTarget(person);
@@ -187,6 +183,12 @@ function Matches() {
           </div>
         </div>
       )}
+
+      <VerifyEmailModal
+        open={verifyPromptOpen}
+        currentUser={currentUser}
+        onClose={() => setVerifyPromptOpen(false)}
+      />
     </div>
   );
 }

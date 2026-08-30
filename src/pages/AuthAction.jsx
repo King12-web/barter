@@ -6,6 +6,7 @@ import {
 import { auth } from "../firebase.js";
 
 function AuthAction() {
+  useEffect(() => { document.title = "Verify | Campus Barter"; }, []);
   const [searchParams] = useSearchParams();
   const mode = searchParams.get("mode");
   const oobCode = searchParams.get("oobCode");

@@ -18,6 +18,7 @@ function textToSkillArray(text) {
 }
 
 function Profile() {
+  useEffect(() => { document.title = "My Profile | Campus Barter"; }, []);
   const navigate = useNavigate();
 
   const [currentUser, setCurrentUser] = useState(null);

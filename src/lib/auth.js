@@ -1,23 +1,18 @@
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   sendPasswordResetEmail,
   signOut,
 } from "firebase/auth";
 import { auth } from "../firebase.js";
 
-/* ============================================================
-   By default, Firebase generates verification/reset links that
-   point to ITS OWN generic hosted page. Passing this settings
-   object with handleCodeInApp: true makes it generate links
-   pointing at OUR page instead — the one built to match our
-   design and handle both link types. This is controlled entirely
-   in code, no Firebase console setting involved.
-   ============================================================ */
+/* Password reset still goes through Firebase's own sender —
+   only VERIFICATION emails moved to our custom SES pipeline
+   (Nigerian networks were flagging Firebase's sending domain as
+   spam). `url` becomes a "continue" link shown after Firebase's
+   own reset-password page finishes. */
 const actionCodeSettings = {
-  url: "https://campusbarter.online/auth-action",
-  handleCodeInApp: true,
+  url: "https://campusbarter.online/signin",
 };
 
 const FRIENDLY = {
@@ -45,20 +40,11 @@ export async function signIn(email, password) {
 export async function signUp(email, password) {
   try {
     const result = await createUserWithEmailAndPassword(auth, email, password);
-
-    /* Sending the verification email is important, but SECONDARY.
-       The account already exists at this point — if the email
-       send fails (e.g. a misconfigured link, a network hiccup),
-       that must NOT make this whole function report failure.
-       Otherwise the caller thinks signup failed, never creates
-       the Firestore profile, and the person is left with a real
-       but orphaned account and no way to retry with that email. */
-    try {
-      await sendEmailVerification(result.user, actionCodeSettings);
-    } catch (verifyError) {
-      console.error("Verification email failed to send:", verifyError);
-    }
-
+    /* No verification email sent here anymore — Join.jsx sends it
+       via /api/send-verification-email (SES-backed) right after
+       this succeeds, since it already has the user's name and
+       the account creation shouldn't be blocked by that call
+       either way. */
     return { ok: true, user: result.user };
   } catch (error) {
     return { ok: false, message: friendly(error) };
@@ -121,18 +107,26 @@ export async function isEmailVerified() {
 }
 
 /* ============================================================
-   Resend the verification email. Verification links can go stale
-   after a few days, so if a user's first email is lost or expired,
-   this gives them a fresh one on demand instead of a dead end.
+   Resend the verification email — now routed through our own
+   /api/send-verification-email (Firebase Admin generates the
+   link server-side, SES delivers it from our trusted domain).
+   Needs email + name explicitly, since Firebase's own user
+   object has no "name" field — we store names in Firestore, not
+   in Firebase Auth's own profile fields.
    ============================================================ */
-export async function resendVerificationEmail() {
-  if (auth.currentUser === null) {
-    return { ok: false, message: "You need to be signed in to resend a verification email." };
-  }
+export async function resendVerificationEmail(email, name) {
   try {
-    await sendEmailVerification(auth.currentUser, actionCodeSettings);
+    const response = await fetch("/api/send-verification-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toEmail: email, name }),
+    });
+    const data = await response.json();
+    if (data.ok === false) {
+      return { ok: false, message: "Couldn't send the verification email. Try again shortly." };
+    }
     return { ok: true };
   } catch (error) {
-    return { ok: false, message: friendly(error) };
+    return { ok: false, message: "Network problem. Check your connection and try again." };
   }
 }

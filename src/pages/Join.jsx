@@ -224,6 +224,18 @@ function Join() {
       console.error("Welcome email failed to send:", error);
     });
 
+    /* Same fire-and-forget reasoning: this is the REAL verification
+       email now (SES-backed, sent from our trusted domain instead
+       of Firebase's own sending infrastructure, which was getting
+       flagged as spam on some Nigerian networks). */
+    fetch("/api/send-verification-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ toEmail: profile.email, name: profile.name }),
+    }).catch((error) => {
+      console.error("Verification email failed to send:", error);
+    });
+
     setLoadingStage(null);
     setStep("done");
   }

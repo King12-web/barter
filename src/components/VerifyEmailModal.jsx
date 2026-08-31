@@ -27,7 +27,7 @@ function VerifyEmailModal({ open, currentUser, onClose }) {
 
   async function handleResend() {
     setResending(true);
-    const result = await resendVerificationEmail();
+    const result = await resendVerificationEmail(currentUser.email, currentUser.name);
     setResending(false);
     setResendMessage(
       result.ok

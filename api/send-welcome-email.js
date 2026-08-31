@@ -1,4 +1,16 @@
+import admin from "firebase-admin";
 import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+import { checkRateLimit } from "./_lib/rateLimit.js";
+
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    }),
+  });
+}
 
 const ses = new SESClient({
   region: process.env.AWS_REGION || "us-east-1",
@@ -8,15 +20,12 @@ const ses = new SESClient({
   },
 });
 
-/* ============================================================
-   The welcome email template.
-   Plain inline CSS throughout — email clients (Gmail, Outlook,
-   etc.) strip out <style> blocks and modern CSS features
-   unpredictably, so every style has to sit directly on the tag
-   as a style="" attribute. This is normal for email, not a
-   step backward from how we style the real app.
-   ============================================================ */
-function buildWelcomeEmailHtml(name) {
+function buildOwnActionLink(firebaseLink, mode) {
+  const oobCode = new URL(firebaseLink).searchParams.get("oobCode");
+  return `https://campusbarter.online/auth-action?mode=${mode}&oobCode=${oobCode}`;
+}
+
+function buildWelcomeEmailHtml(name, verifyLink) {
   const firstName = name.split(" ")[0];
 
   return `
@@ -38,14 +47,14 @@ function buildWelcomeEmailHtml(name) {
         </p>
 
         <p style="font-size:15px; color:#212529; line-height:1.6; margin:0 0 24px;">
-          One quick step before you're fully set up: please verify your email address.
-          Verification is what unlocks proposing and accepting trades on the board.
+          One quick step before you're fully set up: verify your email below. This is what
+          unlocks proposing and accepting trades on the board.
         </p>
 
         <table role="presentation" style="margin:0 auto 28px;">
           <tr>
             <td style="background:#FFE492; border-radius:10px;">
-              <a href="https://campusbarter.online/signin"
+              <a href="${verifyLink}"
                  style="display:inline-block; padding:14px 28px; font-size:14px; font-weight:700;
                         color:#043873; text-decoration:none;">
                 Verify my email
@@ -54,9 +63,9 @@ function buildWelcomeEmailHtml(name) {
           </tr>
         </table>
 
-        <p style="font-size:13px; color:#5B6470; line-height:1.6; margin:0 0 24px;">
-          (Look for a separate verification email from us, and use the link inside it.
-          If you don't see it, check your spam folder, or resend it anytime from the app.)
+        <p style="font-size:12.5px; color:#5B6470; line-height:1.6; margin:0 0 24px;">
+          If the button doesn't work, copy and paste this link into your browser:<br />
+          <span style="word-break:break-all;">${verifyLink}</span>
         </p>
 
         <div style="background:#F7FAFD; border-radius:10px; padding:18px 20px; margin-bottom:8px;">
@@ -90,34 +99,44 @@ export default async function handler(req, res) {
   }
 
   const { toEmail, name } = req.body;
-
   if (!toEmail || !name) {
     return res.status(400).json({ error: "Missing toEmail or name" });
   }
 
-  const command = new SendEmailCommand({
-    Source: "Campus Barter <admin@campusbarter.online>",
-    Destination: { ToAddresses: [toEmail] },
-    Message: {
-      Subject: { Data: "Welcome to Campus Barter — verify your email to get started" },
-      Body: {
-        Html: { Data: buildWelcomeEmailHtml(name) },
-        Text: {
-          Data: `Hi ${name.split(" ")[0]},\n\n` +
-            `Welcome to Campus Barter! You've joined a community where students trade real skills for real skills, no money involved.\n\n` +
-            `Please verify your email to unlock proposing and accepting trades. Check your inbox for a separate verification email, or resend it anytime from the app.\n\n` +
-            `A quick word on how Campus Barter works: this board only works because students keep their word. When you propose or accept a trade, follow through on what you agree to. Ratings and trade history are visible on every profile, so trade fairly and communicate honestly.\n\n` +
-            `Made for students, by students. Trade skills. Grow together.`,
-        },
-      },
-    },
-  });
+  const rateCheck = await checkRateLimit("verify:" + toEmail.toLowerCase(), 60);
+  if (rateCheck.allowed === false) {
+    console.error("Welcome/verification email rate-limited for", toEmail);
+    return res.status(200).json({ ok: true, skipped: true });
+  }
 
   try {
+    const firebaseLink = await admin.auth().generateEmailVerificationLink(toEmail, {
+      url: "https://campusbarter.online/signin",
+    });
+    const verifyLink = buildOwnActionLink(firebaseLink, "verifyEmail");
+
+    const command = new SendEmailCommand({
+      Source: "Campus Barter <admin@campusbarter.online>",
+      Destination: { ToAddresses: [toEmail] },
+      Message: {
+        Subject: { Data: "Welcome to Campus Barter — verify your email to get started" },
+        Body: {
+          Html: { Data: buildWelcomeEmailHtml(name, verifyLink) },
+          Text: {
+            Data: `Hi ${name.split(" ")[0]},\n\n` +
+              `Welcome to Campus Barter! You've joined a community where students trade real skills for real skills, no money involved.\n\n` +
+              `Verify your email to unlock proposing and accepting trades:\n${verifyLink}\n\n` +
+              `A quick word on how Campus Barter works: this board only works because students keep their word. When you propose or accept a trade, follow through on what you agree to. Ratings and trade history are visible on every profile, so trade fairly and communicate honestly.\n\n` +
+              `Made for students, by students. Trade skills. Grow together.`,
+          },
+        },
+      },
+    });
+
     await ses.send(command);
     return res.status(200).json({ ok: true });
   } catch (error) {
-    console.error("SES send failed:", error);
+    console.error("Welcome/verification email failed:", error);
     return res.status(500).json({ ok: false, message: error.message });
   }
 }

@@ -5,6 +5,7 @@ import { signOutUser } from "../lib/auth.js";
 import { getProfile, saveProfile } from "../lib/db.js";
 import { recalcMyRating } from "../lib/trades.js";
 import { logActivity } from "../lib/activity.js";
+import GuidelinesModal from "../components/GuidelinesModal.jsx";
 
 function initials(name) {
   const parts = name.trim().split(" ");
@@ -32,6 +33,7 @@ function Profile() {
   const [showSaved, setShowSaved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
@@ -173,6 +175,11 @@ function Profile() {
                 My trades
               </button>
 
+              <button className="btn btn-outline" onClick={() => setGuidelinesOpen(true)}>
+                <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                Community guidelines
+              </button>
+
               <button className="btn btn-danger-outline" onClick={requestSignOut}>
                 <svg className="icon sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
                 Sign out
@@ -197,6 +204,8 @@ function Profile() {
             </div>
           </div>
         )}
+
+        <GuidelinesModal open={guidelinesOpen} onClose={() => setGuidelinesOpen(false)} />
       </div>
     </div>
   );

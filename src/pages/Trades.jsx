@@ -6,6 +6,7 @@ import {
 } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import ReportModal from "../components/ReportModal.jsx";
 
 function initials(name) {
   const parts = name.trim().split(" ");
@@ -49,7 +50,7 @@ function StarRow({ tradeId, selected, onPick }) {
   );
 }
 
-function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendingStar, onPickStar }) {
+function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendingStar, onPickStar, onReport }) {
   const role = myRole(trade, uid);
   const theirName = role === "proposer" ? trade.receiverName : trade.proposerName;
   const mySkill = role === "proposer" ? trade.offeredSkill : trade.requestedSkill;
@@ -96,6 +97,12 @@ function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendin
             Chat on WhatsApp
           </a>
           <button className="btn btn-outline" onClick={() => onComplete(trade.id)}>Mark completed</button>
+          <button
+            onClick={() => onReport(trade)}
+            style={{ display: "block", width: "100%", background: "none", border: "none", color: "var(--muted)", fontSize: "11.5px", textDecoration: "underline", padding: "8px 0 0", cursor: "pointer", textAlign: "center" }}
+          >
+            Report an issue with this trade
+          </button>
         </>
       )}
 
@@ -125,6 +132,7 @@ function Trades() {
   const toastTimer = useRef(null);
 
   const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
 
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
@@ -220,6 +228,7 @@ function Trades() {
                     key={t.id} trade={t} uid={currentUser.uid}
                     onAccept={handleAccept} onDecline={handleDecline} onComplete={handleComplete}
                     onRate={handleRate} pendingStar={pendingStars[t.id]} onPickStar={handlePickStar}
+                    onReport={(trade) => setReportTarget(trade)}
                   />
                 ))
               )}
@@ -234,6 +243,13 @@ function Trades() {
         open={verifyPromptOpen}
         currentUser={currentUser}
         onClose={() => setVerifyPromptOpen(false)}
+      />
+
+      <ReportModal
+        open={reportTarget !== null}
+        trade={reportTarget}
+        reporterUid={currentUser !== null ? currentUser.uid : null}
+        onClose={() => setReportTarget(null)}
       />
     </div>
   );

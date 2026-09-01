@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { signOutUser, isEmailVerified } from "../lib/auth.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import GuidelinesModal from "../components/GuidelinesModal.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade, recalcMyRating } from "../lib/trades.js";
 import { isMatch, overlap } from "../lib/matcher.js";
@@ -41,6 +42,7 @@ function Dashboard() {
   const toastTimer = useRef(null);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
   const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
+  const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   /* ---- propose modal state ---- */
   const [proposeTarget, setProposeTarget] = useState(null);
@@ -60,6 +62,16 @@ function Dashboard() {
       const user = JSON.parse(stored);
       setCurrentUser(user);
       setViewInstitution(user.institution);
+
+      /* Shown once per device, first time a signed-in student
+         lands on the board. Tracked via localStorage rather than
+         a Firestore field — this is a low-stakes UX nicety, not
+         something worth a database write for. If someone clears
+         their browser data or switches devices, they might see
+         it again once more — an acceptable, honest trade-off. */
+      if (localStorage.getItem("seenGuidelines") === null) {
+        setGuidelinesOpen(true);
+      }
     } else {
       setViewInstitution("University of Lagos");
     }
@@ -461,6 +473,14 @@ function Dashboard() {
           open={verifyPromptOpen}
           currentUser={currentUser}
           onClose={() => setVerifyPromptOpen(false)}
+        />
+
+        <GuidelinesModal
+          open={guidelinesOpen}
+          onClose={() => {
+            localStorage.setItem("seenGuidelines", "1");
+            setGuidelinesOpen(false);
+          }}
         />
 
       </div>

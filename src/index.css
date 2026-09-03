@@ -1301,3 +1301,9 @@ footer .ft-green {
 .profile-page input, .profile-page textarea { font-size: 16px; }
 .search-wrap input { font-size: 16px; }
 .campus-picker select.open { font-size: 16px; }
+/* ================= HEADER SPACING FIX (append to bottom of index.css) ================= */
+/* The back arrow and page title were sitting flush against each
+   other with zero gap. Fixed once here since Trades, Profile,
+   Matches, Notifications, and Admin all share this exact same
+   header structure — one fix covers all five pages. */
+.topbar-inner .title { margin-left: 12px; }

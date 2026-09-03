@@ -176,20 +176,16 @@ function Profile() {
               {saveError && <p className="error" style={{ display: "block" }}>{saveError}</p>}
               {showSaved && <p className="saved-note">Saved.</p>}
 
-              <button className="btn btn-outline" onClick={() => navigate("/trades")}>
-                <svg className="icon sm" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /></svg>
-                My trades
-              </button>
-
-              <button className="btn btn-outline" onClick={() => setGuidelinesOpen(true)}>
-                <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
-                Community guidelines
-              </button>
-
-              <button className="btn btn-outline" onClick={() => setSuggestionOpen(true)}>
-                <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
-                Suggest a feature
-              </button>
+              <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
+                <button className="btn btn-navy" style={{ flex: 1, width: "auto", marginTop: 0 }} onClick={() => setGuidelinesOpen(true)}>
+                  <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                  Community guidelines
+                </button>
+                <button className="btn btn-navy" style={{ flex: 1, width: "auto", marginTop: 0 }} onClick={() => setSuggestionOpen(true)}>
+                  <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
+                  Suggest a feature
+                </button>
+              </div>
 
               <button className="btn btn-danger-outline" onClick={requestSignOut}>
                 <svg className="icon sm" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>

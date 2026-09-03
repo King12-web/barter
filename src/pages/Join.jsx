@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Spinner from "../components/Spinner.jsx";
-import Spinner from "../components/Spinner.jsx";
 import { signUp } from "../lib/auth.js";
 import { saveProfile } from "../lib/db.js";
 import { INSTITUTIONS, INSTITUTION_NAMES } from "../data/institutions.js";

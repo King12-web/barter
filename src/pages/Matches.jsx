@@ -5,6 +5,7 @@ import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import Spinner from "../components/Spinner.jsx";
 import { isMatch, overlap } from "../lib/matcher.js";
 
 function initials(name) {
@@ -178,7 +179,10 @@ function Matches() {
               value={proposeTerms} onChange={(e) => setProposeTerms(e.target.value)} />
             {proposeError && <p className="error" style={{ display: "block", marginBottom: "8px" }}>{proposeError}</p>}
 
-            <button className="btn btn-navy" onClick={sendProposal} disabled={proposeSending}>{proposeSending ? "Sending..." : "Send proposal"}</button>
+            <button className="btn btn-navy" onClick={sendProposal} disabled={proposeSending} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              {proposeSending && <Spinner />}
+              {proposeSending ? "Sending..." : "Send proposal"}
+            </button>
             <button className="btn" style={{ background: "transparent", color: "var(--muted)", marginTop: "8px" }} onClick={closeModal}>Cancel</button>
           </div>
         </div>

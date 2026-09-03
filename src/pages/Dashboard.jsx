@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { signOutUser, isEmailVerified } from "../lib/auth.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import Spinner from "../components/Spinner.jsx";
 import GuidelinesModal from "../components/GuidelinesModal.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade, recalcMyRating } from "../lib/trades.js";
@@ -444,7 +445,8 @@ function Dashboard() {
                 value={proposeTerms} onChange={(e) => setProposeTerms(e.target.value)} />
               {proposeError && <p className="error" style={{ display: "block", marginBottom: "10px" }}>{proposeError}</p>}
 
-              <button className="btn btn-navy" style={{ marginTop: "4px" }} onClick={sendProposal} disabled={proposeSending}>
+              <button className="btn btn-navy" style={{ marginTop: "4px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }} onClick={sendProposal} disabled={proposeSending}>
+                {proposeSending && <Spinner />}
                 {proposeSending ? "Sending..." : "Send proposal"}
               </button>
               <button className="btn" style={{ background: "transparent", color: "var(--muted)", marginTop: "8px" }} onClick={closeProposeModal}>Cancel</button>

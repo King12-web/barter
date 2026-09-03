@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Spinner from "../components/Spinner.jsx";
 import AppNav from "../components/AppNav.jsx";
 import { signOutUser } from "../lib/auth.js";
 import { getProfile, saveProfile } from "../lib/db.js";
@@ -168,7 +169,10 @@ function Profile() {
                 <p className="hint">Only shared when you accept a trade. Never on your profile.</p>
               </div>
 
-              <button className="btn btn-navy" onClick={handleSave} disabled={saving}>{saving ? "Saving..." : "Save changes"}</button>
+              <button className="btn btn-navy" onClick={handleSave} disabled={saving} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                {saving && <Spinner />}
+                {saving ? "Saving..." : "Save changes"}
+              </button>
               {saveError && <p className="error" style={{ display: "block" }}>{saveError}</p>}
               {showSaved && <p className="saved-note">Saved.</p>}
 

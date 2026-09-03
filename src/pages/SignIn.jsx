@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Spinner from "../components/Spinner.jsx";
 import { signIn, resetPassword } from "../lib/auth.js";
 import { getProfile } from "../lib/db.js";
 
@@ -134,7 +135,10 @@ function SignIn() {
 
           <a className="forgot" href="#" onClick={(e) => { e.preventDefault(); handleForgotPassword(); }}>Forgot password?</a>
 
-          <button className="btn btn-navy" onClick={handleSignIn} disabled={loading}>{btnText}</button>
+          <button className="btn btn-navy" onClick={handleSignIn} disabled={loading} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            {loading && <Spinner />}
+            {btnText}
+          </button>
 
           {(noticeLead || noticeRest) && (
             <div className="notice">

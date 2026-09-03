@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import Spinner from "../components/Spinner.jsx";
+import Spinner from "../components/Spinner.jsx";
 import { signUp } from "../lib/auth.js";
 import { saveProfile } from "../lib/db.js";
 import { INSTITUTIONS, INSTITUTION_NAMES } from "../data/institutions.js";
@@ -403,7 +405,10 @@ function Join() {
               </label>
               {agreeError && <p className="error" style={{ display: "block", marginTop: "6px" }}>Please agree to the Terms and Privacy Policy to continue.</p>}
 
-              <button className="btn btn-yellow" onClick={handleSubmit} disabled={loadingStage !== null}>{joinBtnText}</button>
+              <button className="btn btn-yellow" onClick={handleSubmit} disabled={loadingStage !== null} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                {loadingStage !== null && <Spinner color="var(--navy)" />}
+                {joinBtnText}
+              </button>
               {signupError && <p className="error" style={{ display: "block", marginTop: "12px" }}>{signupError}</p>}
               <button className="btn btn-ghost" onClick={() => attemptGoToStep(3)}>Back</button>
             </div>

@@ -12,6 +12,7 @@ import AuthAction from "./pages/AuthAction.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Terms from "./pages/Terms.jsx";
 import Privacy from "./pages/Privacy.jsx";
+import Admin from "./pages/Admin.jsx";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/auth-action" element={<AuthAction />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>

@@ -177,11 +177,11 @@ function Profile() {
               {showSaved && <p className="saved-note">Saved.</p>}
 
               <div style={{ display: "flex", gap: "10px", marginTop: "10px" }}>
-                <button className="btn btn-navy" style={{ flex: 1, width: "auto", marginTop: 0 }} onClick={() => setGuidelinesOpen(true)}>
+                <button className="btn btn-navy" style={{ flex: 1, width: "auto", marginTop: 0, flexDirection: "column", gap: "6px", textAlign: "center" }} onClick={() => setGuidelinesOpen(true)}>
                   <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
                   Community guidelines
                 </button>
-                <button className="btn btn-navy" style={{ flex: 1, width: "auto", marginTop: 0 }} onClick={() => setSuggestionOpen(true)}>
+                <button className="btn btn-navy" style={{ flex: 1, width: "auto", marginTop: 0, flexDirection: "column", gap: "6px", textAlign: "center" }} onClick={() => setSuggestionOpen(true)}>
                   <svg className="icon sm" viewBox="0 0 24 24"><path d="M12 20h9" /><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" /></svg>
                   Suggest a feature
                 </button>

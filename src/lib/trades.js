@@ -18,7 +18,11 @@ export async function proposeTrade(proposer, receiver, offeredSkill, requestedSk
     const ref = await addDoc(collection(db, "trades"), tradeDoc);
     return { ok: true, data: { id: ref.id, ...tradeDoc } };
   } catch (error) {
-    return { ok: false, message: "Something went wrong sending that proposal." };
+    console.error("proposeTrade failed:", error.code, error.message);
+    const message = error.code === "permission-denied"
+      ? "You don't have permission to propose this trade right now. If you were recently verified or your suspension just lifted, try again in a moment."
+      : "Something went wrong sending that proposal. (" + error.code + ")";
+    return { ok: false, message };
   }
 }
 

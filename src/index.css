@@ -22,6 +22,7 @@
   --need: #f97316;
   --need-bg: #fef0e6;
   --danger: #e11d48;
+  --blue-text: #0d5fc2;
   --radius: 14px;
 }
 
@@ -160,10 +161,11 @@ h3,
    (this used to exist twice with conflicting values; the OTHER
    copy silently won and broke it). */
 .btn-danger-outline {
-  background: var(--danger);
-  color: #ffffff;
-  border: none;
+  background: transparent;
+  color: var(--danger);
+  border: 1.5px solid #f3c9d3;
 }
+
 /* ================= FIXED NAV (landing) ================= */
 .topbar {
   position: fixed;
@@ -353,11 +355,11 @@ section {
 }
 .tag.offer {
   background: var(--offer-bg);
-  color: var(--offer);
+  color: #0f6e56;
 }
 .tag.need {
   background: var(--need-bg);
-  color: var(--need);
+  color: #a14e10;
 }
 
 /* match animation (landing page Feature 1) */
@@ -755,7 +757,7 @@ footer .ft-green {
   text-align: right;
   font-size: 12.5px;
   font-weight: 600;
-  color: var(--blue);
+  color: var(--blue-text);
   text-decoration: none;
   margin-top: 10px;
 }
@@ -792,7 +794,7 @@ footer .ft-green {
   color: var(--ink);
 }
 .notice a {
-  color: var(--blue);
+  color: var(--blue-text);
   font-weight: 600;
   text-decoration: none;
 }
@@ -819,7 +821,7 @@ footer .ft-green {
   margin-top: 16px;
 }
 .join-link a {
-  color: var(--blue);
+  color: var(--blue-text);
   font-weight: 700;
   text-decoration: none;
 }
@@ -941,11 +943,11 @@ footer .ft-green {
 }
 .tag-preview .tag.offer {
   background: var(--offer-bg);
-  color: var(--offer);
+  color: #0f6e56;
 }
 .tag-preview .tag.need {
   background: var(--need-bg);
-  color: var(--need);
+  color: #a14e10;
 }
 
 .success {

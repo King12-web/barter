@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Allow: /join
+Allow: /signin
+Allow: /terms
+Allow: /privacy
+
+# These pages require a real signed-in session to show anything
+# meaningful — no value in a search engine indexing an empty
+# "sign in to see this" state, and /admin should never be
+# discoverable or crawlable at all.
+Disallow: /dashboard
+Disallow: /matches
+Disallow: /trades
+Disallow: /profile
+Disallow: /notifications
+Disallow: /admin
+Disallow: /auth-action
+
+Sitemap: https://campusbarter.online/sitemap.xml

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
 import ScrollToTop from "./components/ScrollToTop.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 
 const Landing = lazy(() => import("./pages/Landing.jsx"));
 const Join = lazy(() => import("./pages/Join.jsx"));
@@ -35,15 +36,22 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/join" element={<Join />} />
           <Route path="/signin" element={<SignIn />} />
+
+          {/* Dashboard is intentionally NOT wrapped in RequireAuth —
+              guest browsing of the board is a designed feature. */}
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="/trades" element={<Trades />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/notifications" element={<Notifications />} />
+
+          {/* These have nothing meaningful for a signed-out visitor —
+              redirect straight to sign in instead of a dead-end page. */}
+          <Route path="/matches" element={<RequireAuth><Matches /></RequireAuth>} />
+          <Route path="/trades" element={<RequireAuth><Trades /></RequireAuth>} />
+          <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
+          <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />
+          <Route path="/admin" element={<RequireAuth><Admin /></RequireAuth>} />
+
           <Route path="/auth-action" element={<AuthAction />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="/privacy" element={<Privacy />} />
-          <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>

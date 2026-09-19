@@ -10,7 +10,9 @@ export async function proposeTrade(proposer, receiver, offeredSkill, requestedSk
   try {
     const tradeDoc = {
       proposerUid: proposer.uid, proposerName: proposer.name, proposerWhatsapp: proposer.whatsapp,
+      proposerPhoto: proposer.photoURL || null,
       receiverUid: receiver.uid, receiverName: receiver.name, receiverWhatsapp: receiver.whatsapp,
+      receiverPhoto: receiver.photoURL || null,
       offeredSkill, requestedSkill, terms: terms || "",
       status: "pending", proposerRating: null, receiverRating: null,
       createdAt: serverTimestamp(), updatedAt: serverTimestamp(),

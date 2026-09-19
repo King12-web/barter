@@ -137,9 +137,9 @@ function Matches() {
                     return (
                       <div className="card" key={m.uid || m.email}>
                         <div className="swap-row">
-                          <div className="swap-person"><div className="match-avatar av-a">{initials(currentUser.name)}</div>You</div>
+                          <div className="swap-person"><div className="match-avatar av-a" style={{ overflow: "hidden" }}>{currentUser.photoURL ? <img src={currentUser.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(currentUser.name)}</div>You</div>
                           <div className="swap-mid"><svg className="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg></div>
-                          <div className="swap-person"><div className="match-avatar av-b">{initials(m.name)}</div>{m.name}</div>
+                          <div className="swap-person"><div className="match-avatar av-b" style={{ overflow: "hidden" }}>{m.photoURL ? <img src={m.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(m.name)}</div>{m.name}</div>
                         </div>
                         <p className="match-note">Your <b className="o">{youGive[0]}</b> for their <b className="n">{youGet[0]}</b></p>
                         <p className="meta">{m.institution}</p>

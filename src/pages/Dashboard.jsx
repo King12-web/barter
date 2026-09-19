@@ -348,9 +348,9 @@ function Dashboard() {
                   <path d="M 5 130 Q 60 50 110 90 T 195 80" />
                 </svg>
                 <div className="swap-row">
-                  <div className="swap-person"><div className="avatar av-0">{initials(currentUser.name)}</div>You</div>
+                  <div className="swap-person"><div className="avatar av-0" style={{ overflow: "hidden" }}>{currentUser.photoURL ? <img src={currentUser.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(currentUser.name)}</div>You</div>
                   <div className="swap-mid"><svg className="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg></div>
-                  <div className="swap-person"><div className="avatar av-2">{initials(heroMatch.name)}</div>{heroMatch.name}</div>
+                  <div className="swap-person"><div className="avatar av-2" style={{ overflow: "hidden" }}>{heroMatch.photoURL ? <img src={heroMatch.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(heroMatch.name)}</div>{heroMatch.name}</div>
                 </div>
                 <p className="match-note">
                   Your <b className="o">{overlap(currentUser.offers, heroMatch.needs)[0]}</b> for their <b className="n">{overlap(heroMatch.offers, currentUser.needs)[0]}</b>
@@ -377,7 +377,7 @@ function Dashboard() {
                 {visible.map((v, i) => (
                   <div className="card" key={v.person.uid || v.person.email}>
                     <div className="person-top">
-                      <div className={"avatar " + AV_CLASSES[i % AV_CLASSES.length]}>{initials(v.person.name)}</div>
+                      <div className={"avatar " + AV_CLASSES[i % AV_CLASSES.length]} style={{ overflow: "hidden" }}>{v.person.photoURL ? <img src={v.person.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(v.person.name)}</div>
                       <div>
                         <p className="name">{v.person.name}</p>
                         <p className="institution-line">{v.person.institution}</p>

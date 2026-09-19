@@ -53,6 +53,7 @@ function StarRow({ tradeId, selected, onPick }) {
 function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendingStar, onPickStar, onReport }) {
   const role = myRole(trade, uid);
   const theirName = role === "proposer" ? trade.receiverName : trade.proposerName;
+  const theirPhoto = role === "proposer" ? trade.receiverPhoto : trade.proposerPhoto;
   const mySkill = role === "proposer" ? trade.offeredSkill : trade.requestedSkill;
   const theirSkill = role === "proposer" ? trade.requestedSkill : trade.offeredSkill;
   const iAmReceiver = role === "receiver";
@@ -64,7 +65,9 @@ function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendin
   return (
     <div className="card">
       <div className="trade-top">
-        <div className="trade-avatar">{initials(theirName)}</div>
+        <div className="trade-avatar" style={{ overflow: "hidden" }}>
+          {theirPhoto ? <img src={theirPhoto} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(theirName)}
+        </div>
         <div>
           <p className="trade-name">{theirName}</p>
           <p className="trade-sub">{role === "proposer" ? "You proposed" : "They proposed"}</p>

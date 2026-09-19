@@ -6,6 +6,7 @@ import { signOutUser } from "../lib/auth.js";
 import { getProfile, saveProfile } from "../lib/db.js";
 import { recalcMyRating } from "../lib/trades.js";
 import { logActivity } from "../lib/activity.js";
+import { uploadAvatar } from "../lib/upload.js";
 import GuidelinesModal from "../components/GuidelinesModal.jsx";
 import SuggestionModal from "../components/SuggestionModal.jsx";
 
@@ -37,6 +38,8 @@ function Profile() {
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const [suggestionOpen, setSuggestionOpen] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState("");
 
   useEffect(() => {
     const stored = localStorage.getItem("currentUser");
@@ -60,6 +63,32 @@ function Profile() {
       });
     });
   }, []);
+
+  async function handlePhotoChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setPhotoError("");
+    setUploadingPhoto(true);
+
+    const result = await uploadAvatar(file);
+    setUploadingPhoto(false);
+
+    if (result.ok === false) {
+      setPhotoError(result.message);
+      return;
+    }
+
+    const saveResult = await saveProfile(currentUser.uid, { photoURL: result.url });
+    if (saveResult.ok === false) {
+      setPhotoError("Photo uploaded, but saving it to your profile failed. Try again.");
+      return;
+    }
+
+    const updated = { ...currentUser, photoURL: result.url };
+    setCurrentUser(updated);
+    localStorage.setItem("currentUser", JSON.stringify(updated));
+  }
 
   async function handleSave() {
     setSaveError("");
@@ -136,7 +165,21 @@ function Profile() {
           {checked && currentUser !== null && (
             <>
               <div className="profile-head">
-                <div className="avatar-lg">{initials(currentUser.name)}</div>
+                <label style={{ position: "relative", display: "inline-block", cursor: "pointer" }}>
+                  <div className="avatar-lg" style={{ overflow: "hidden" }}>
+                    {currentUser.photoURL ? (
+                      <img src={currentUser.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    ) : (
+                      initials(currentUser.name)
+                    )}
+                  </div>
+                  <div style={{ position: "absolute", bottom: 0, right: 0, width: "22px", height: "22px", borderRadius: "50%", background: "var(--navy)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", border: "2px solid var(--card)" }}>
+                    <svg className="icon" style={{ width: "12px", height: "12px" }} viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>
+                  </div>
+                  <input type="file" accept="image/*" onChange={handlePhotoChange} style={{ display: "none" }} disabled={uploadingPhoto} />
+                </label>
+                {uploadingPhoto && <p className="hint" style={{ marginTop: "8px" }}>Uploading photo...</p>}
+                {photoError && <p className="error" style={{ display: "block", marginTop: "6px" }}>{photoError}</p>}
                 <p className="profile-name">{currentUser.name}</p>
                 <p className="profile-meta">{currentUser.institution} &middot; {currentUser.email}</p>
                 <div className="stat-row">

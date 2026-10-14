@@ -1,0 +1,26 @@
+<%# Expects: name, verifyLink %>
+<div style="background:#F7FAFD; padding:32px 16px; font-family:Arial, Helvetica, sans-serif;">
+  <div style="max-width:480px; margin:0 auto; background:#FFFFFF; border-radius:14px; overflow:hidden; border:1px solid #E3E9F0;">
+
+    <%- include('_header') %>
+
+    <div style="padding:32px 28px;">
+      <p style="font-size:16px; color:#212529; margin:0 0 16px;">Hi <%= name.split(' ')[0] %>,</p>
+
+      <p style="font-size:15px; color:#212529; line-height:1.6; margin:0 0 16px;">
+        Welcome to Campus Barter! You've just joined a community where students trade real
+        skills for real skills, no money involved. We're glad you're here.
+      </p>
+
+      <p style="font-size:15px; color:#212529; line-height:1.6; margin:0 0 24px;">
+        One quick step before you're fully set up: verify your email below. This is what
+        unlocks proposing and accepting trades on the board.
+      </p>
+
+      <%- include('_button', { href: verifyLink, label: 'Verify my email' }) %>
+      <%- include('_trust') %>
+    </div>
+
+    <%- include('_footer') %>
+  </div>
+</div>

@@ -1,0 +1,16 @@
+<%# Partial expects: href, label %>
+<table role="presentation" style="margin:0 auto 28px;">
+  <tr>
+    <td style="background:#FFE492; border-radius:10px;">
+      <a href="<%= href %>"
+         style="display:inline-block; padding:14px 28px; font-size:14px; font-weight:700;
+                color:#043873; text-decoration:none;">
+        <%= label %>
+      </a>
+    </td>
+  </tr>
+</table>
+<p style="font-size:12.5px; color:#5B6470; line-height:1.6; margin:0 0 16px;">
+  If the button doesn't work, copy and paste this link into your browser:<br />
+  <span style="word-break:break-all;"><%= href %></span>
+</p>

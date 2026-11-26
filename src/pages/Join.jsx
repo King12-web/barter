@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Spinner from "../components/Spinner.jsx";
-import { signUp } from "../lib/auth.js";
+import { signUp, sendWelcomeEmail } from "../lib/auth.js";
 import { saveProfile } from "../lib/db.js";
 import { INSTITUTIONS, INSTITUTION_NAMES } from "../data/institutions.js";
 
@@ -221,13 +221,7 @@ function Join() {
        (merged into one message — sending them separately used to
        leave people unsure which of the two emails actually had
        the verification link). */
-    fetch("/api/send-welcome-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ toEmail: profile.email, name: profile.name }),
-    }).catch((error) => {
-      console.error("Welcome/verification email failed to send:", error);
-    });
+    sendWelcomeEmail();
 
     setLoadingStage(null);
     setStep("done");

@@ -5,6 +5,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { auth } from "../firebase.js";
+import { authHeader } from "./authHeader.js";
 
 /* Password reset still goes through Firebase's own sender —
    only VERIFICATION emails moved to our custom SES pipeline
@@ -107,26 +108,29 @@ export async function isEmailVerified() {
 }
 
 /* ============================================================
-   Resend the verification email — now routed through our own
-   /api/send-verification-email (Firebase Admin generates the
-   link server-side, SES delivers it from our trusted domain).
-   Needs email + name explicitly, since Firebase's own user
-   object has no "name" field — we store names in Firestore, not
-   in Firebase Auth's own profile fields.
+   Welcome and verification emails go through our own /api routes
+   (Firebase Admin generates the link server-side, SES delivers it
+   from our trusted domain). Only the ID token is sent: the server
+   takes the address from the token and the name from the profile.
    ============================================================ */
-export async function resendVerificationEmail(email, name) {
+async function requestEmail(path) {
   try {
-    const response = await fetch("/api/send-verification-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ toEmail: email, name }),
-    });
+    const response = await fetch(path, { method: "POST", headers: await authHeader() });
     const data = await response.json();
-    if (data.ok === false) {
+    if (data.ok !== true) {
       return { ok: false, message: "Couldn't send the verification email. Try again shortly." };
     }
     return { ok: true };
   } catch (error) {
-    return { ok: false, message: "Network problem. Check your connection and try again." };
+    console.error("Email request failed:", error);
+    return { ok: false, message: "Couldn't send the email. Check your connection, or sign in again." };
   }
+}
+
+export function sendWelcomeEmail() {
+  return requestEmail("/api/send-welcome-email");
+}
+
+export function resendVerificationEmail() {
+  return requestEmail("/api/send-verification-email");
 }

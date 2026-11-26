@@ -71,7 +71,7 @@ function Matches() {
   }
 
   const matches = currentUser !== null
-    ? allPeople.filter((p) => p.email !== currentUser.email && isMatch(currentUser, p))
+    ? allPeople.filter((p) => p.uid !== currentUser.uid && isMatch(currentUser, p))
     : [];
 
   /* Optimistic toggle: update the UI immediately, then roll back

@@ -93,7 +93,7 @@ function Dashboard() {
     setPeople([]);
 
     if (currentUser !== null) {
-      recalcMyRating(currentUser.uid); // self-heal my own rating; see lib/trades.js
+      recalcMyRating(); // self-heal my own rating; see lib/trades.js
     }
 
     const fetchPromise = viewInstitution === "__ALL__"
@@ -163,7 +163,7 @@ function Dashboard() {
   let hiddenSkillCount = 0;
   const visible = [];
   for (const p of people) {
-    if (currentUser !== null && p.email === currentUser.email) continue;
+    if (currentUser !== null && p.uid === currentUser.uid) continue;
     if (viewingAll === false && p.institution !== viewInstitution) continue;
 
     if (searchTerm.trim().length > 0) {

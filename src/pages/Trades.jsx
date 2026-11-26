@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import AppNav from "../components/AppNav.jsx";
 import {
-  getMyTrades, acceptTrade, declineTrade, completeTrade, rateTrade, recalcMyRating,
+  getMyTrades, acceptTrade, declineTrade, completeTrade, rateTrade, recalcMyRating, getTradeContact,
 } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
@@ -19,14 +19,18 @@ function myRole(trade, uid) {
   return trade.proposerUid === uid ? "proposer" : "receiver";
 }
 
-function whatsappLink(trade, role) {
-  const theirNumber = role === "proposer" ? trade.receiverWhatsapp : trade.proposerWhatsapp;
+/* Takes the WhatsApp number as a plain argument now, instead of
+   reading it off the trade document — that number comes from
+   getTradeContact() (server/routes/tradeContact.js), fetched only
+   once a trade is actually accepted, never stored on the trade
+   document itself anymore. */
+function whatsappLink(trade, role, contactWhatsapp) {
   const theirName = role === "proposer" ? trade.receiverName : trade.proposerName;
   const mySkill = role === "proposer" ? trade.offeredSkill : trade.requestedSkill;
   const theirSkill = role === "proposer" ? trade.requestedSkill : trade.offeredSkill;
   const message = `Hi ${theirName}! Campus Barter match: my ${mySkill} for your ${theirSkill}. When works for you?`;
 
-  let digits = theirNumber.replace(/\D/g, "");
+  let digits = contactWhatsapp.replace(/\D/g, "");
   if (digits.charAt(0) === "0") digits = "234" + digits.slice(1);
   return "https://wa.me/" + digits + "?text=" + encodeURIComponent(message);
 }
@@ -50,7 +54,7 @@ function StarRow({ tradeId, selected, onPick }) {
   );
 }
 
-function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendingStar, onPickStar, onReport }) {
+function TradeCard({ trade, uid, contact, onRetryContact, onAccept, onDecline, onComplete, onRate, pendingStar, onPickStar, onReport }) {
   const role = myRole(trade, uid);
   const theirName = role === "proposer" ? trade.receiverName : trade.proposerName;
   const theirPhoto = role === "proposer" ? trade.receiverPhoto : trade.proposerPhoto;
@@ -95,10 +99,21 @@ function TradeCard({ trade, uid, onAccept, onDecline, onComplete, onRate, pendin
 
       {trade.status === "accepted" && (
         <>
-          <a className="btn btn-green" href={whatsappLink(trade, role)} target="_blank" rel="noopener noreferrer">
-            <svg className="icon sm" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
-            Chat on WhatsApp
-          </a>
+          {contact === undefined && (
+            <p className="trade-sub" style={{ textAlign: "center" }}>Loading contact details...</p>
+          )}
+          {contact !== undefined && !contact?.whatsapp && (
+            <>
+              <p className="trade-sub" style={{ textAlign: "center" }}>Contact details aren't available right now.</p>
+              <button className="btn btn-outline" onClick={() => onRetryContact(trade.id)}>Try again</button>
+            </>
+          )}
+          {contact?.whatsapp && (
+            <a className="btn btn-green" href={whatsappLink(trade, role, contact.whatsapp)} target="_blank" rel="noopener noreferrer">
+              <svg className="icon sm" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" /></svg>
+              Chat on WhatsApp
+            </a>
+          )}
           <button className="btn btn-outline" onClick={() => onComplete(trade.id)}>Mark completed</button>
           <button
             onClick={() => onReport(trade)}
@@ -131,6 +146,7 @@ function Trades() {
   const [allTrades, setAllTrades] = useState([]);
   const [tab, setTab] = useState("active");
   const [pendingStars, setPendingStars] = useState({});
+  const [contacts, setContacts] = useState({});
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
 
@@ -148,13 +164,44 @@ function Trades() {
     getMyTrades(currentUser.uid).then((result) => {
       setAllTrades(result.ok ? result.data : []);
     });
-    recalcMyRating(currentUser.uid);
+    recalcMyRating();
   }
 
   useEffect(() => {
     loadTrades();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
+
+  /* Fetch the other party's contact info for every accepted trade
+     we don't already have it for — once per trade, not on every
+     render (the "id in contacts" check covers a null result too,
+     so a trade whose contact fetch genuinely came back empty
+     isn't retried forever). */
+  useEffect(() => {
+    const acceptedIds = allTrades.filter((t) => t.status === "accepted").map((t) => t.id);
+    const missing = acceptedIds.filter((id) => !(id in contacts));
+    if (missing.length === 0) return;
+
+    missing.forEach((id) => {
+      getTradeContact(id).then((contact) => {
+        setContacts((prev) => ({ ...prev, [id]: contact }));
+      });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allTrades]);
+
+  /* Clearing the entry first puts the card back into its
+     "Loading..." state while the retry is in flight. */
+  function retryContact(id) {
+    setContacts((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    getTradeContact(id).then((contact) => {
+      setContacts((prev) => ({ ...prev, [id]: contact }));
+    });
+  }
 
   function showToast(message) {
     setToast(message);
@@ -168,7 +215,6 @@ function Trades() {
        instead of trusting stale data */
     const verified = await isEmailVerified();
     if (verified === false) {
-      setResendMessage("");
       setVerifyPromptOpen(true);
       return;
     }
@@ -229,6 +275,8 @@ function Trades() {
                 filtered.map((t) => (
                   <TradeCard
                     key={t.id} trade={t} uid={currentUser.uid}
+                    contact={contacts[t.id]}
+                    onRetryContact={retryContact}
                     onAccept={handleAccept} onDecline={handleDecline} onComplete={handleComplete}
                     onRate={handleRate} pendingStar={pendingStars[t.id]} onPickStar={handlePickStar}
                     onReport={(trade) => setReportTarget(trade)}

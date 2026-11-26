@@ -14,6 +14,14 @@ const router = Router();
 
 router.use(requireAuth);
 
+const MAX_SAVED = 500;
+const GENERIC_ERROR = "Something went wrong. Try again shortly.";
+
+/* Listing IDs are profile uids: short strings. */
+function isValidListingId(id) {
+  return typeof id === "string" && id.length > 0 && id.length <= 128;
+}
+
 /* ---- POST /api/saved-listings ----
    Body: { listingId }. Bookmarking the same listing twice is a
    harmless no-op, not an error — the unique index on the model
@@ -21,12 +29,16 @@ router.use(requireAuth);
    swallow and still return success. */
 router.post("/", async (req, res) => {
   const { listingId } = req.body || {};
-  if (!listingId) {
-    return res.status(400).json({ error: "Missing listingId" });
+  if (!isValidListingId(listingId)) {
+    return res.status(400).json({ error: "Missing or invalid listingId" });
   }
 
   try {
     await connectToDatabase();
+    const savedCount = await SavedListing.countDocuments({ firebaseUid: req.firebaseUid });
+    if (savedCount >= MAX_SAVED) {
+      return res.status(400).json({ ok: false, message: "Saved list is full" });
+    }
     await SavedListing.create({ firebaseUid: req.firebaseUid, listingId });
     return res.status(200).json({ ok: true });
   } catch (error) {
@@ -34,7 +46,7 @@ router.post("/", async (req, res) => {
       return res.status(200).json({ ok: true });
     }
     console.error("Saving listing failed:", error);
-    return res.status(500).json({ ok: false, message: error.message });
+    return res.status(500).json({ ok: false, message: GENERIC_ERROR });
   }
 });
 
@@ -49,7 +61,7 @@ router.get("/", async (req, res) => {
     return res.status(200).json({ ok: true, listingIds: saved.map((s) => s.listingId) });
   } catch (error) {
     console.error("Fetching saved listings failed:", error);
-    return res.status(500).json({ ok: false, message: error.message });
+    return res.status(500).json({ ok: false, message: GENERIC_ERROR });
   }
 });
 
@@ -66,7 +78,7 @@ router.delete("/:listingId", async (req, res) => {
     return res.status(200).json({ ok: true });
   } catch (error) {
     console.error("Removing saved listing failed:", error);
-    return res.status(500).json({ ok: false, message: error.message });
+    return res.status(500).json({ ok: false, message: GENERIC_ERROR });
   }
 });
 

@@ -5,11 +5,18 @@ import { Analytics } from '@vercel/analytics/react'
 import './index.css'
 import App from './App.jsx'
 
+// Keep one-time email codes (verification, password reset) out of analytics.
+function redactAuthCodes(event) {
+  const url = new URL(event.url)
+  url.searchParams.delete('oobCode')
+  return { ...event, url: url.toString() }
+}
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <App />
-      <Analytics />
+      <Analytics beforeSend={redactAuthCodes} />
     </BrowserRouter>
   </StrictMode>,
 )

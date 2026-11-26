@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -14,3 +14,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+
+/* Pages read the cached profile from localStorage. Drop it as soon
+   as Firebase reports there is no session, so the two can't drift. */
+onAuthStateChanged(auth, (user) => {
+  if (user === null) localStorage.removeItem("currentUser");
+});

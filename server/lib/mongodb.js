@@ -35,6 +35,13 @@ export async function connectToDatabase() {
     }).then((m) => m);
   }
 
-  cached.conn = await cached.promise;
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    /* Forget the failed attempt so the next request retries
+       instead of reusing a rejected promise forever. */
+    cached.promise = null;
+    throw error;
+  }
   return cached.conn;
 }

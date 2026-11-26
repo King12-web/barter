@@ -49,7 +49,7 @@ function Profile() {
     }
     const user = JSON.parse(stored);
 
-    recalcMyRating(user.uid).then(() => {
+    recalcMyRating().then(() => {
       getProfile(user.uid).then((result) => {
         const fresh = result.ok && result.data !== null
           ? { uid: user.uid, ...result.data }

@@ -21,8 +21,9 @@ export async function requireAuth(req, res, next) {
   try {
     const decoded = await admin.auth().verifyIdToken(token);
     req.firebaseUid = decoded.uid;
+    req.firebaseEmail = decoded.email;
     next();
-  } catch (error) {
+  } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 }

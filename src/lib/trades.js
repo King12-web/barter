@@ -2,6 +2,7 @@ import {
   collection, addDoc, doc, updateDoc, query, where, getDocs, serverTimestamp,
 } from "firebase/firestore";
 import { db } from "../firebase.js";
+import { authHeader } from "./authHeader.js";
 
 export async function proposeTrade(proposer, receiver, offeredSkill, requestedSkill, terms) {
   if (!proposer.uid || !receiver.uid) {
@@ -9,9 +10,16 @@ export async function proposeTrade(proposer, receiver, offeredSkill, requestedSk
   }
   try {
     const tradeDoc = {
-      proposerUid: proposer.uid, proposerName: proposer.name, proposerWhatsapp: proposer.whatsapp,
+      /* No proposerWhatsapp/receiverWhatsapp here anymore — those
+         used to be copied onto this document at proposal time,
+         which meant both parties could read each other's contact
+         info immediately via the Firestore SDK, before anyone
+         accepted anything. getTradeContact() below replaces this,
+         fetched through a backend check that enforces status ===
+         "accepted" before returning anything. */
+      proposerUid: proposer.uid, proposerName: proposer.name,
       proposerPhoto: proposer.photoURL || null,
-      receiverUid: receiver.uid, receiverName: receiver.name, receiverWhatsapp: receiver.whatsapp,
+      receiverUid: receiver.uid, receiverName: receiver.name,
       receiverPhoto: receiver.photoURL || null,
       offeredSkill, requestedSkill, terms: terms || "",
       status: "pending", proposerRating: null, receiverRating: null,
@@ -79,43 +87,39 @@ export async function rateTrade(tradeId, raterRole, stars) {
 }
 
 /* ============================================================
-   Self-write-only rating aggregation. Firestore rules only allow
-   writing YOUR OWN profile — see the long comment this originally
-   shipped with — so each person recalculates their own average
-   whenever their own session loads, never someone else's.
+   Fetches the OTHER party's contact info for an accepted trade,
+   through the Express backend (server/routes/tradeContact.js) —
+   never read directly from Firestore, since that's exactly the
+   path that used to leak this early. Returns null on any failure
+   (trade not accepted yet, not your trade, network issue, etc.)
+   rather than throwing, since callers just want "show the button
+   or don't."
    ============================================================ */
-export async function recalcMyRating(uid) {
+export async function getTradeContact(tradeId) {
   try {
-    const asProposer = query(collection(db, "trades"), where("proposerUid", "==", uid));
-    const asReceiver = query(collection(db, "trades"), where("receiverUid", "==", uid));
-    const [proposerSnap, receiverSnap] = await Promise.all([getDocs(asProposer), getDocs(asReceiver)]);
-
-    let completedCount = 0;
-    let ratingsReceived = [];
-
-    proposerSnap.forEach((d) => {
-      const data = d.data();
-      if (data.status === "completed") {
-        completedCount++;
-        if (data.receiverRating != null) ratingsReceived.push(data.receiverRating);
-      }
+    const response = await fetch(`/api/trade-contact/${encodeURIComponent(tradeId)}`, {
+      headers: await authHeader(),
     });
-    receiverSnap.forEach((d) => {
-      const data = d.data();
-      if (data.status === "completed") {
-        completedCount++;
-        if (data.proposerRating != null) ratingsReceived.push(data.proposerRating);
-      }
+    const data = await response.json();
+    return data.ok ? { whatsapp: data.whatsapp } : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+/* ============================================================
+   Asks the server to recalculate MY rating and trade count
+   (server/routes/ratings.js). The browser never writes those
+   fields itself, so they can't be faked.
+   ============================================================ */
+export async function recalcMyRating() {
+  try {
+    const response = await fetch("/api/ratings/recalculate", {
+      method: "POST",
+      headers: await authHeader(),
     });
-
-    let avgRating = null;
-    if (ratingsReceived.length > 0) {
-      const sum = ratingsReceived.reduce((a, b) => a + b, 0);
-      avgRating = Math.round((sum / ratingsReceived.length) * 10) / 10;
-    }
-
-    await updateDoc(doc(db, "profiles", uid), { rating: avgRating, trades: completedCount });
-    return { ok: true };
+    const data = await response.json();
+    return { ok: data.ok === true };
   } catch (error) {
     console.error("Failed to recalculate rating:", error);
     return { ok: false };

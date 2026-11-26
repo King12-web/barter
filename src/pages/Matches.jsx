@@ -4,6 +4,7 @@ import AppNav from "../components/AppNav.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
+import { saveListing, unsaveListing, getSavedListingIds } from "../lib/savedListings.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
 import Spinner from "../components/Spinner.jsx";
 import { isMatch, overlap } from "../lib/matcher.js";
@@ -22,6 +23,7 @@ function Matches() {
   const [scope, setScope] = useState("campus");
   const [allPeople, setAllPeople] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [savedIds, setSavedIds] = useState([]);
 
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
@@ -54,6 +56,14 @@ function Matches() {
     });
   }, [scope, currentUser]);
 
+  /* Load this user's saved matches once, when they're known — not
+     re-fetched on every scope toggle, since saved ids don't depend
+     on which people are currently listed. */
+  useEffect(() => {
+    if (currentUser === null) return;
+    getSavedListingIds().then(setSavedIds);
+  }, [currentUser]);
+
   function showToast(message) {
     setToast(message);
     clearTimeout(toastTimer.current);
@@ -63,6 +73,20 @@ function Matches() {
   const matches = currentUser !== null
     ? allPeople.filter((p) => p.email !== currentUser.email && isMatch(currentUser, p))
     : [];
+
+  /* Optimistic toggle: update the UI immediately, then roll back
+     only if the server call actually fails — feels instant on a
+     normal connection instead of waiting on a round trip. */
+  async function toggleSave(id) {
+    const isSaved = savedIds.includes(id);
+    setSavedIds((prev) => (isSaved ? prev.filter((x) => x !== id) : [...prev, id]));
+
+    const result = isSaved ? await unsaveListing(id) : await saveListing(id);
+    if (result.ok === false) {
+      setSavedIds((prev) => (isSaved ? [...prev, id] : prev.filter((x) => x !== id)));
+      showToast(result.message);
+    }
+  }
 
   async function openModal(person) {
     const verified = await isEmailVerified();
@@ -134,8 +158,17 @@ function Matches() {
                   {matches.map((m) => {
                     const youGive = overlap(currentUser.offers, m.needs);
                     const youGet = overlap(m.offers, currentUser.needs);
+                    const id = m.uid || m.email;
+                    const isSaved = savedIds.includes(id);
                     return (
-                      <div className="card" key={m.uid || m.email}>
+                      <div className="card" key={id}>
+                        <button
+                          onClick={() => toggleSave(id)}
+                          aria-label={isSaved ? "Remove from saved" : "Save for later"}
+                          style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer", lineHeight: 1 }}
+                        >
+                          {isSaved ? "★" : "☆"}
+                        </button>
                         <div className="swap-row">
                           <div className="swap-person"><div className="match-avatar av-a" style={{ overflow: "hidden" }}>{currentUser.photoURL ? <img src={currentUser.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(currentUser.name)}</div>You</div>
                           <div className="swap-mid"><svg className="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg></div>

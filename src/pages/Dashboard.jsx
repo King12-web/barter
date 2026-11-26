@@ -7,6 +7,7 @@ import GuidelinesModal from "../components/GuidelinesModal.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
 import { proposeTrade, recalcMyRating } from "../lib/trades.js";
 import { isMatch, overlap } from "../lib/matcher.js";
+import { saveListing, unsaveListing, getSavedListingIds } from "../lib/savedListings.js";
 
 const IN_PERSON = [
   "laptop repair", "phone repair", "haircut", "barbing",
@@ -38,6 +39,7 @@ function Dashboard() {
   const [people, setPeople] = useState([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [savedIds, setSavedIds] = useState([]);
 
   const [toast, setToast] = useState("");
   const toastTimer = useRef(null);
@@ -105,6 +107,12 @@ function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewInstitution]);
 
+  /* Load this user's saved profiles once, when they're known. */
+  useEffect(() => {
+    if (currentUser === null) return;
+    getSavedListingIds().then(setSavedIds);
+  }, [currentUser]);
+
   function showToast(message) {
     setToast(message);
     clearTimeout(toastTimer.current);
@@ -131,6 +139,19 @@ function Dashboard() {
     await signOutUser();
     localStorage.removeItem("currentUser");
     navigate("/");
+  }
+
+  /* Optimistic toggle: update the UI immediately, then roll back
+     only if the server call actually fails. */
+  async function toggleSave(id) {
+    const isSaved = savedIds.includes(id);
+    setSavedIds((prev) => (isSaved ? prev.filter((x) => x !== id) : [...prev, id]));
+
+    const result = isSaved ? await unsaveListing(id) : await saveListing(id);
+    if (result.ok === false) {
+      setSavedIds((prev) => (isSaved ? [...prev, id] : prev.filter((x) => x !== id)));
+      showToast(result.message);
+    }
   }
 
   /* ---- derive the visible list every render — no separate state
@@ -255,6 +276,10 @@ function Dashboard() {
             </nav>
 
             <div className="topbar-actions">
+              <button className="iconbtn" aria-label="Saved listings" onClick={() => navigate("/saved")}>
+                <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg>
+              </button>
+
               <button className="iconbtn" aria-label="Notifications" onClick={() => navigate("/notifications")}>
                 <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg>
               </button>
@@ -347,6 +372,13 @@ function Dashboard() {
                   <path d="M 5 100 Q 50 20 100 60 T 195 50" />
                   <path d="M 5 130 Q 60 50 110 90 T 195 80" />
                 </svg>
+                <button
+                  onClick={() => toggleSave(heroMatch.uid || heroMatch.email)}
+                  aria-label={savedIds.includes(heroMatch.uid || heroMatch.email) ? "Remove from saved" : "Save for later"}
+                  style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer", lineHeight: 1, position: "relative", zIndex: 1 }}
+                >
+                  {savedIds.includes(heroMatch.uid || heroMatch.email) ? "★" : "☆"}
+                </button>
                 <div className="swap-row">
                   <div className="swap-person"><div className="avatar av-0" style={{ overflow: "hidden" }}>{currentUser.photoURL ? <img src={currentUser.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(currentUser.name)}</div>You</div>
                   <div className="swap-mid"><svg className="icon" viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9" /><path d="M3 11V9a4 4 0 0 1 4-4h14" /><polyline points="7 23 3 19 7 15" /><path d="M21 13v2a4 4 0 0 1-4 4H3" /></svg></div>
@@ -374,26 +406,37 @@ function Dashboard() {
               )}
 
               <div id="peopleList">
-                {visible.map((v, i) => (
-                  <div className="card" key={v.person.uid || v.person.email}>
-                    <div className="person-top">
-                      <div className={"avatar " + AV_CLASSES[i % AV_CLASSES.length]} style={{ overflow: "hidden" }}>{v.person.photoURL ? <img src={v.person.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(v.person.name)}</div>
-                      <div>
-                        <p className="name">{v.person.name}</p>
-                        <p className="institution-line">{v.person.institution}</p>
-                        <p className="meta">
-                          <svg className="icon sm fill" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>{" "}
-                          {v.person.rating == null ? "New" : v.person.rating.toFixed(1)} &middot; {v.person.trades || 0} trades
-                        </p>
+                {visible.map((v, i) => {
+                  const id = v.person.uid || v.person.email;
+                  const isSaved = savedIds.includes(id);
+                  return (
+                    <div className="card" key={id}>
+                      <button
+                        onClick={() => toggleSave(id)}
+                        aria-label={isSaved ? "Remove from saved" : "Save for later"}
+                        style={{ float: "right", background: "none", border: "none", fontSize: "20px", cursor: "pointer", lineHeight: 1 }}
+                      >
+                        {isSaved ? "★" : "☆"}
+                      </button>
+                      <div className="person-top">
+                        <div className={"avatar " + AV_CLASSES[i % AV_CLASSES.length]} style={{ overflow: "hidden" }}>{v.person.photoURL ? <img src={v.person.photoURL} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : initials(v.person.name)}</div>
+                        <div>
+                          <p className="name">{v.person.name}</p>
+                          <p className="institution-line">{v.person.institution}</p>
+                          <p className="meta">
+                            <svg className="icon sm fill" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>{" "}
+                            {v.person.rating == null ? "New" : v.person.rating.toFixed(1)} &middot; {v.person.trades || 0} trades
+                          </p>
+                        </div>
                       </div>
+                      <div className="skill-split">
+                        <div className="skill-panel o"><p className="skill-panel-label">OFFERS</p><p className="skill-panel-list">{v.shownOffers.join(", ")}</p></div>
+                        <div className="skill-panel n"><p className="skill-panel-label">NEEDS</p><p className="skill-panel-list">{v.person.needs.length > 0 ? v.person.needs.join(", ") : "nothing listed"}</p></div>
+                      </div>
+                      <button className="btn btn-blue" onClick={() => openProposeModal(v.person)}>Propose swap</button>
                     </div>
-                    <div className="skill-split">
-                      <div className="skill-panel o"><p className="skill-panel-label">OFFERS</p><p className="skill-panel-list">{v.shownOffers.join(", ")}</p></div>
-                      <div className="skill-panel n"><p className="skill-panel-label">NEEDS</p><p className="skill-panel-list">{v.person.needs.length > 0 ? v.person.needs.join(", ") : "nothing listed"}</p></div>
-                    </div>
-                    <button className="btn btn-blue" onClick={() => openProposeModal(v.person)}>Propose swap</button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}

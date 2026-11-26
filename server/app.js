@@ -18,6 +18,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import express from "express";
 import emailRoutes from "./routes/email.js";
+import savedListingsRoutes from "./routes/savedListings.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -35,8 +36,9 @@ app.set("views", path.join(__dirname, "views"));
 
 app.use(express.json({ limit: "10kb" }));
 app.use("/api", emailRoutes);
+app.use("/api/saved-listings", savedListingsRoutes);
 
-// Anything under /api that isn't one of the three routes above —
+// Anything under /api that isn't one of the routes above —
 // explicit 404 instead of falling through to Express's default
 // HTML error page, which would leak stack-trace-style details.
 app.use("/api", (req, res) => {

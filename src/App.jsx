@@ -16,6 +16,7 @@ const Terms = lazy(() => import("./pages/Terms.jsx"));
 const Privacy = lazy(() => import("./pages/Privacy.jsx"));
 const Admin = lazy(() => import("./pages/Admin.jsx"));
 const NotFound = lazy(() => import("./pages/NotFound.jsx"));
+const Saved = lazy(() => import("./pages/Saved.jsx"));
 
 function PageLoading() {
   return (
@@ -44,6 +45,7 @@ function App() {
           {/* These have nothing meaningful for a signed-out visitor —
               redirect straight to sign in instead of a dead-end page. */}
           <Route path="/matches" element={<RequireAuth><Matches /></RequireAuth>} />
+          <Route path="/saved" element={<RequireAuth><Saved /></RequireAuth>} />
           <Route path="/trades" element={<RequireAuth><Trades /></RequireAuth>} />
           <Route path="/profile" element={<RequireAuth><Profile /></RequireAuth>} />
           <Route path="/notifications" element={<RequireAuth><Notifications /></RequireAuth>} />

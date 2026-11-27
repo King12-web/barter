@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { signOutUser, isEmailVerified } from "../lib/auth.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import SuspendedModal from "../components/SuspendedModal.jsx";
+import { getMySuspension } from "../lib/suspension.js";
 import Spinner from "../components/Spinner.jsx";
 import GuidelinesModal from "../components/GuidelinesModal.jsx";
 import { getProfilesByInstitution, getAllProfiles } from "../lib/db.js";
@@ -45,6 +47,7 @@ function Dashboard() {
   const toastTimer = useRef(null);
   const [signOutConfirmOpen, setSignOutConfirmOpen] = useState(false);
   const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
+  const [suspension, setSuspension] = useState(null);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
 
   /* ---- propose modal state ---- */
@@ -207,6 +210,12 @@ function Dashboard() {
     const verified = await isEmailVerified();
     if (verified === false) {
       setVerifyPromptOpen(true);
+      return;
+    }
+
+    const activeSuspension = await getMySuspension();
+    if (activeSuspension !== null) {
+      setSuspension(activeSuspension);
       return;
     }
 
@@ -513,6 +522,8 @@ function Dashboard() {
             </div>
           </div>
         )}
+
+        <SuspendedModal suspension={suspension} onClose={() => setSuspension(null)} />
 
         <VerifyEmailModal
           open={verifyPromptOpen}

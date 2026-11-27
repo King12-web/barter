@@ -6,6 +6,8 @@ import { proposeTrade } from "../lib/trades.js";
 import { isEmailVerified } from "../lib/auth.js";
 import { saveListing, unsaveListing, getSavedListingIds } from "../lib/savedListings.js";
 import VerifyEmailModal from "../components/VerifyEmailModal.jsx";
+import SuspendedModal from "../components/SuspendedModal.jsx";
+import { getMySuspension } from "../lib/suspension.js";
 import Spinner from "../components/Spinner.jsx";
 import { isMatch, overlap } from "../lib/matcher.js";
 
@@ -30,6 +32,7 @@ function Matches() {
 
   const [modalTarget, setModalTarget] = useState(null);
   const [verifyPromptOpen, setVerifyPromptOpen] = useState(false);
+  const [suspension, setSuspension] = useState(null);
   const [proposeOffer, setProposeOffer] = useState("");
   const [proposeNeed, setProposeNeed] = useState("");
   const [proposeTerms, setProposeTerms] = useState("");
@@ -92,6 +95,12 @@ function Matches() {
     const verified = await isEmailVerified();
     if (verified === false) {
       setVerifyPromptOpen(true);
+      return;
+    }
+
+    const activeSuspension = await getMySuspension();
+    if (activeSuspension !== null) {
+      setSuspension(activeSuspension);
       return;
     }
     setModalTarget(person);
@@ -220,6 +229,8 @@ function Matches() {
           </div>
         </div>
       )}
+
+      <SuspendedModal suspension={suspension} onClose={() => setSuspension(null)} />
 
       <VerifyEmailModal
         open={verifyPromptOpen}

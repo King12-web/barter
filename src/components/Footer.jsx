@@ -4,10 +4,10 @@ function Footer() {
   return (
     <footer>
       <p>Made for <span className="ft-green">students</span>, by <span className="ft-green">students</span>. Trade skills. Grow together.</p>
-      <p style={{ marginTop: "10px", fontSize: "11.5px" }}>
-        <Link to="/terms" style={{ color: "inherit", textDecoration: "underline" }}>Terms of Service</Link>
+      <p className="legal-row" style={{ marginTop: "10px" }}>
+        <Link to="/terms" className="legal">Terms of Service</Link>
         {" "}&middot;{" "}
-        <Link to="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>Privacy Policy</Link>
+        <Link to="/privacy" className="legal">Privacy Policy</Link>
       </p>
     </footer>
   );

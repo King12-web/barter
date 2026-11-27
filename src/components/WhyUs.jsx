@@ -2,7 +2,7 @@ function WhyUs() {
   return (
     <section className="band-soft" id="why">
       <div className="wrap">
-        <div className="navy-band">
+        <div className="navy-band reveal">
           <svg className="hero-curve" viewBox="0 0 400 400" aria-hidden="true">
             <path d="M 10 200 Q 100 40 200 120 T 390 100" />
             <path d="M 10 260 Q 120 100 220 180 T 395 160" />

@@ -2,7 +2,7 @@ function HowItWorks() {
   return (
     <section id="how">
       <div className="wrap">
-        <div className="steps-head">
+        <div className="steps-head reveal">
           <h2>
             Four steps to your{" "}
             <span className="hl on-white">

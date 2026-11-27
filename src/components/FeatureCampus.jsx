@@ -4,7 +4,7 @@ function FeatureCampus() {
   return (
     <section className="band-soft" id="campus">
       <div className="wrap feature-row flip">
-        <div className="f-copy">
+        <div className="f-copy reveal">
           <h2>
             Your whole campus,{" "}
             <span className="hl on-white">
@@ -22,25 +22,27 @@ function FeatureCampus() {
           </p>
           <Link className="btn btn-blue" to="/join">Join your campus board</Link>
         </div>
-        <div className="f-art">
+        <div className="f-art orbit-art reveal">
           {/* orbit illustration */}
           <svg viewBox="0 0 480 320" role="img" aria-label="Students orbiting one campus board">
             <circle cx="240" cy="160" r="130" fill="none" stroke="#C9DCF5" strokeWidth="2" strokeDasharray="3 8" />
             <circle cx="240" cy="160" r="78" fill="none" stroke="#C9DCF5" strokeWidth="2" strokeDasharray="3 8" />
-            <rect x="212" y="132" width="56" height="56" rx="16" fill="#043873" />
-            <g stroke="#FFE492" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M228 152 h24" />
-              <path d="M247 146 l7 6 -7 6" />
-              <path d="M252 168 h-24" />
-              <path d="M233 162 l-7 6 7 6" />
+            <g className="badge">
+              <rect x="212" y="132" width="56" height="56" rx="16" fill="#043873" />
+              <g stroke="#FFE492" strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M228 152 h24" />
+                <path d="M247 146 l7 6 -7 6" />
+                <path d="M252 168 h-24" />
+                <path d="M233 162 l-7 6 7 6" />
+              </g>
             </g>
-            <g fontFamily="DM Sans, sans-serif" fontSize="13" fontWeight="700" textAnchor="middle">
-              <circle cx="240" cy="30" r="20" fill="#E1EEFE" /><text x="240" y="35" fill="#4F9CF9">ZK</text>
-              <circle cx="110" cy="110" r="20" fill="#E8F7EE" /><text x="110" y="115" fill="#16A34A">TK</text>
-              <circle cx="370" cy="110" r="20" fill="#FEF0E6" /><text x="370" y="115" fill="#F97316">MO</text>
-              <circle cx="140" cy="252" r="20" fill="#FFF3D0" /><text x="140" y="257" fill="#A87908">AM</text>
-              <circle cx="340" cy="252" r="20" fill="#E1EEFE" /><text x="340" y="257" fill="#4F9CF9">CE</text>
-              <circle cx="240" cy="290" r="20" fill="#E8F7EE" /><text x="240" y="295" fill="#16A34A">FS</text>
+            <g className="orbit" fontFamily="DM Sans, sans-serif" fontSize="13" fontWeight="700" textAnchor="middle">
+              <g className="upright"><circle cx="240" cy="30" r="20" fill="#E1EEFE" /><text x="240" y="35" fill="#0D5FC2">ZK</text></g>
+              <g className="upright"><circle cx="110" cy="110" r="20" fill="#E8F7EE" /><text x="110" y="115" fill="#0F6E36">TK</text></g>
+              <g className="upright"><circle cx="370" cy="110" r="20" fill="#FEF0E6" /><text x="370" y="115" fill="#9A4308">MO</text></g>
+              <g className="upright"><circle cx="140" cy="252" r="20" fill="#FFF3D0" /><text x="140" y="257" fill="#6E5000">AM</text></g>
+              <g className="upright"><circle cx="340" cy="252" r="20" fill="#E1EEFE" /><text x="340" y="257" fill="#0D5FC2">CE</text></g>
+              <g className="upright"><circle cx="240" cy="290" r="20" fill="#E8F7EE" /><text x="240" y="295" fill="#0F6E36">FS</text></g>
             </g>
           </svg>
         </div>

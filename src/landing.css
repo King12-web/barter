@@ -1,0 +1,322 @@
+/* ============================================================
+   LANDING PAGE ONLY — animations, phone/tablet fixes, menu and
+   back-to-top button. Every selector is scoped under .landing so
+   nothing here leaks into the other pages, which share several
+   class names (.btn, .topbar, .hero-curve).
+   ============================================================ */
+
+/* ================= READABILITY COLOURS ================= */
+.landing .ma-offer { color: #0f6e36; }
+.landing .ma-need { color: #9a4308; }
+.landing .n2 { color: #0d5fc2; }
+.landing .n3 { color: #0f6e36; }
+.landing .n4 { color: #9a4308; }
+.landing .btn-blue { color: #03203f; }
+
+/* ================= ENTRANCES ================= */
+.landing .rise { animation: lp-rise 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+/* The headline only moves (no fade), so it paints straight away. */
+.landing .lift { animation: lp-lift 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.landing .d1 { animation-delay: 0.12s; }
+.landing .d2 { animation-delay: 0.24s; }
+.landing .d3 { animation-delay: 0.36s; }
+.landing .hero .hl path { stroke-dasharray: 100; animation: lp-draw 1s 0.7s ease-out both; }
+
+/* ================= BUTTONS ================= */
+.landing .btn { position: relative; transition: translate 0.2s, box-shadow 0.2s; }
+.landing .btn:hover { translate: 0 -3px; box-shadow: 0 10px 22px rgba(3, 31, 63, 0.3); }
+.landing .btn .icon { transition: translate 0.2s; }
+.landing .btn:hover .icon { translate: 4px 0; }
+.landing .glow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 3px solid var(--yellow);
+  opacity: 0;
+  pointer-events: none;
+  animation: lp-glow 2.8s ease-out 1.2s 3;
+}
+
+/* ================= ILLUSTRATIONS =================
+   Only transform and opacity are animated: moving dashed lines
+   (stroke-dashoffset) kept the processor busy in testing. */
+.landing svg g,
+.landing svg .mv { transform-box: fill-box; transform-origin: center; }
+.landing .bob { animation: lp-bob 4s ease-in-out infinite; }
+.landing .bob.late { animation-delay: -2s; }
+.landing .arm-l,
+.landing .arm-r { transform-box: view-box; animation: lp-wave-l 2.8s ease-in-out infinite; }
+.landing .arm-l { transform-origin: 100px 212px; }
+.landing .arm-r { transform-origin: 420px 208px; animation-name: lp-wave-r; animation-delay: -1.4s; }
+.landing .bubble { animation: lp-pop 5s ease-in-out infinite; }
+.landing .bubble.late { animation-delay: -2.5s; }
+.landing .go-r { animation: lp-nudge-r 2s ease-in-out infinite; }
+.landing .go-l { animation: lp-nudge-l 2s ease-in-out infinite; }
+.landing .pill { animation: lp-throb 3s ease-in-out infinite; }
+.landing .pill.late { animation-delay: -1.5s; }
+.landing .badge { animation: lp-throb 2.2s ease-in-out infinite; }
+.landing .dot { animation: lp-twinkle 2.4s ease-in-out infinite; }
+.landing .links { animation: lp-glimmer 2.4s ease-in-out infinite; }
+.landing .orbit { transform-box: view-box; transform-origin: 240px 160px; animation: lp-spin 40s linear infinite; }
+.landing .upright { animation: lp-spin 40s linear infinite reverse; }
+
+/* ================= CARDS, FAQ, FINAL BAND ================= */
+.landing .step-card { position: relative; transition: translate 0.25s, border-color 0.25s; }
+.landing .step-card::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 14px 34px rgba(79, 156, 249, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  animation: lp-spot 8s ease-in-out infinite;
+}
+.landing .step-card:nth-child(2)::after { animation-delay: 2s; }
+.landing .step-card:nth-child(3)::after { animation-delay: 4s; }
+.landing .step-card:nth-child(4)::after { animation-delay: 6s; }
+.landing .step-card:hover { translate: 0 -8px; border-color: var(--blue); }
+
+.landing .nf { transition: translate 0.25s; }
+.landing .nf:hover { translate: 0 -6px; }
+.landing .nf:hover .nf-icon { animation: lp-wiggle 0.6s ease; }
+
+.landing .faq-wrap details { padding: 0; transition: border-color 0.2s, translate 0.2s; }
+.landing .faq-wrap details:hover { border-color: var(--blue); translate: 4px 0; }
+.landing .faq-wrap summary { min-height: 58px; padding: 14px 20px; }
+.landing .faq-wrap details p { margin-top: 0; padding: 0 20px 18px; }
+.landing .faq-wrap details[open] p { animation: lp-rise 0.35s ease both; }
+
+.landing .final-band { position: relative; overflow: hidden; }
+.landing .final-band h2,
+.landing .final-band p,
+.landing .final-band .btn { position: relative; }
+.landing .blob {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(79, 156, 249, 0.45);
+  pointer-events: none;
+  animation: lp-drift 9s ease-in-out infinite;
+}
+.landing .blob-top { width: 150px; height: 150px; left: 6%; top: -40px; }
+.landing .blob-low { width: 90px; height: 90px; right: 12%; bottom: 18px; animation-delay: -3s; }
+.landing .blob-mid { width: 44px; height: 44px; right: 28%; top: 28px; animation-delay: -6s; }
+
+/* ================= COUNT-UP ================= */
+@property --lp-count { syntax: "<integer>"; initial-value: 330; inherits: false; }
+.landing .count { counter-reset: lp-count var(--lp-count, 330); animation: lp-count 1.8s 0.6s ease-out both; }
+.landing .count::after { content: counter(lp-count); }
+
+/* ================= SCROLL REVEAL =================
+   Browsers without scroll-driven animations just show the
+   sections normally. */
+@supports (animation-timeline: view()) {
+  .landing .navy-band,
+  .landing .hero-band,
+  .landing .final-band { overflow: clip; }
+  .landing .reveal {
+    animation: lp-rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0px entry 180px;
+  }
+}
+
+/* ================= NAV, MENU, ANCHORS ================= */
+.landing section { scroll-margin-top: 76px; }
+.landing section#how { scroll-margin-top: 56px; }
+.landing .nav-links { gap: 18px; }
+.landing .nav-links a { padding: 15px 9px; }
+.landing .nav-links a::after { bottom: 9px; }
+.landing .menu-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  border-radius: 10px;
+  color: #ffffff;
+  cursor: pointer;
+}
+/* Floats over the page, so closing it mid-scroll shifts nothing. */
+.landing .menu-panel {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 4px 22px 10px;
+  background: var(--navy);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 14px 24px rgba(3, 31, 63, 0.35);
+}
+.landing .menu-panel.open { display: flex; animation: lp-drop 0.22s ease-out; }
+.landing .menu-panel a {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* ================= BACK TO TOP ================= */
+.landing .to-top {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 90;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--yellow);
+  color: var(--navy);
+  border: 2px solid var(--navy);
+  box-shadow: 0 8px 20px rgba(3, 31, 63, 0.35);
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 14px;
+  transition: opacity 0.25s, translate 0.25s, visibility 0.25s;
+}
+.landing .to-top.show { opacity: 1; visibility: visible; translate: 0 0; }
+.landing .to-top.show:hover { translate: 0 -3px; }
+
+.landing .legal {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  color: inherit;
+  text-decoration: underline;
+}
+.landing .phone-break { display: none; }
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes lp-rise { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+@keyframes lp-lift { from { transform: translateY(20px); } to { transform: none; } }
+@keyframes lp-draw { from { stroke-dashoffset: 100; } to { stroke-dashoffset: 0; } }
+@keyframes lp-glimmer { 50% { opacity: 0.3; } }
+@keyframes lp-bob { 50% { transform: translateY(-7px); } }
+@keyframes lp-wave-l { 50% { transform: rotate(-14deg); } }
+@keyframes lp-wave-r { 50% { transform: rotate(14deg); } }
+@keyframes lp-pop { 0%, 100% { transform: translateY(0) scale(1); } 45% { transform: translateY(-8px) scale(1.08); } }
+@keyframes lp-nudge-r { 50% { transform: translateX(12px); } }
+@keyframes lp-nudge-l { 50% { transform: translateX(-12px); } }
+@keyframes lp-throb { 50% { transform: scale(1.12); } }
+@keyframes lp-twinkle { 50% { opacity: 0.25; transform: scale(1.7); } }
+@keyframes lp-spin { to { transform: rotate(360deg); } }
+@keyframes lp-spot { 0%, 25%, 100% { opacity: 0; } 12% { opacity: 1; } }
+@keyframes lp-wiggle { 25% { transform: rotate(-14deg); } 60% { transform: rotate(12deg); } }
+@keyframes lp-glow { 0% { opacity: 0.9; transform: scale(1); } 80%, 100% { opacity: 0; transform: scale(1.12, 1.4); } }
+@keyframes lp-drift { 50% { transform: translate(24px, -22px); } }
+@keyframes lp-drop { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes lp-count { from { --lp-count: 0; } to { --lp-count: 330; } }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (min-width: 800px) {
+  .landing .menu-btn,
+  .landing .menu-panel,
+  .landing .menu-panel.open { display: none; }
+}
+
+@media (max-width: 899px) {
+  /* Phones and small tablets: keep entrances, drop decorative loops. */
+  .landing .arm-l,
+  .landing .arm-r,
+  .landing .bubble,
+  .landing .pill,
+  .landing .badge,
+  .landing .dot,
+  .landing .links,
+  .landing .orbit,
+  .landing .upright,
+  .landing .blob,
+  .landing .step-card::after,
+  .landing .bob { animation: none; }
+  .landing .hero-art .bob { animation: lp-bob 4s ease-in-out 3; }
+
+  .landing .hero-art,
+  .landing .feature-row .f-art { width: 100%; max-width: 480px; margin: 0 auto; }
+  .landing .orbit-art { overflow: hidden; }
+
+  .landing .hero-proof { font-size: 13.5px; line-height: 1.5; }
+  .landing .tag { font-size: 13px; }
+  .landing .step-card p:not(.num) { font-size: 15px; }
+  .landing .nf p { font-size: 14px; }
+  .landing footer { font-size: 13.5px; line-height: 1.6; }
+  .landing footer .legal-row { font-size: 13px; }
+}
+
+@media (min-width: 621px) and (max-width: 899px) {
+  .landing .hero,
+  .landing .f-copy { text-align: center; }
+  .landing .hero .lede,
+  .landing .f-copy p { margin-left: auto; margin-right: auto; }
+  .landing .cta-row,
+  .landing .hero-proof { justify-content: center; }
+}
+
+@media (max-width: 620px) {
+  .landing .phone-break { display: inline; }
+  .landing .hero { padding: 36px 0 40px; gap: 28px; }
+  .landing .hero h1 {
+    font-size: clamp(32px, calc((100vw - 44px) / 8.4), 44px);
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+    margin-bottom: 22px;
+  }
+  .landing .hero .lede { max-width: none; text-align: justify; hyphens: auto; text-wrap: pretty; }
+  .landing .hero-proof span { text-align: justify; hyphens: auto; }
+  .landing .btn { min-height: 50px; }
+  .landing .f-copy .btn { display: flex; }
+  .landing .feature-row { gap: 28px; }
+  .landing .match-anim { gap: 8px; width: 100%; }
+  .landing .ma-tag { font-size: 14px; padding: 9px 14px; white-space: nowrap; }
+  .landing .orbit-art svg { width: 130%; margin-left: -15%; }
+  .landing .steps-head { margin-bottom: 28px; }
+  .landing .steps { gap: 14px; }
+  .landing .step-card { display: grid; grid-template-columns: 42px 1fr; column-gap: 14px; padding: 18px; }
+  .landing .step-card .num { grid-row: span 2; margin-bottom: 0; }
+  .landing .step-card h3 { margin: 0 0 4px; align-self: center; }
+  .landing .navy-band { padding: 32px 22px; }
+  .landing .navy-band h2 { margin-bottom: 24px; }
+  .landing .navy-feats { grid-template-columns: 1fr; gap: 20px; }
+  .landing .nf { display: grid; grid-template-columns: 42px 1fr; column-gap: 14px; align-content: start; }
+  .landing .nf-icon { grid-row: span 2; margin-bottom: 0; }
+  .landing .nf h3 { margin-bottom: 4px; }
+  .landing .final-band { padding: 52px 22px; }
+  .landing .blob-low,
+  .landing .blob-mid { display: none; }
+  .landing footer { padding-bottom: 84px; }
+  .landing .to-top { right: 14px; bottom: 14px; }
+}
+
+@media (max-width: 360px) {
+  .landing .ma-tag { font-size: 13px; padding: 8px 10px; }
+}
+
+@media (hover: none) {
+  .landing .btn:hover,
+  .landing .step-card:hover,
+  .landing .nf:hover,
+  .landing .faq-wrap details:hover { translate: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .landing *,
+  .landing *::before,
+  .landing *::after { animation: none !important; transition: none !important; }
+}

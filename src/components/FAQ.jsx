@@ -2,7 +2,7 @@ function FAQ() {
   return (
     <section id="faq">
       <div className="wrap faq-wrap">
-        <div className="steps-head">
+        <div className="steps-head reveal">
           <h2>
             Questions students{" "}
             <span className="hl on-white">
@@ -14,7 +14,7 @@ function FAQ() {
           </h2>
         </div>
 
-        <details name="faq">
+        <details name="faq" className="reveal">
           <summary>
             Is Campus Barter free?
             <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24">
@@ -25,7 +25,7 @@ function FAQ() {
           <p>Completely. No fees, no subscriptions, no money anywhere in the app. That's the whole point. Your skills are the currency.</p>
         </details>
 
-        <details name="faq">
+        <details name="faq" className="reveal">
           <summary>
             How do we contact each other after a match?
             <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24">
@@ -36,7 +36,7 @@ function FAQ() {
           <p>Through WhatsApp, where you already chat. Your number stays private until you accept a trade; then both of you get a chat button. Nobody can see or search your number on your profile.</p>
         </details>
 
-        <details name="faq">
+        <details name="faq" className="reveal">
           <summary>
             What if someone doesn't deliver their side?
             <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24">
@@ -47,7 +47,7 @@ function FAQ() {
           <p>Every completed trade ends with both people rating each other, and ratings plus trade history show on every profile. Trade with people who deliver. Reputations are earned, not claimed.</p>
         </details>
 
-        <details name="faq">
+        <details name="faq" className="reveal">
           <summary>
             Is my institution supported?
             <svg className="icon" style={{ width: "17px", height: "17px" }} viewBox="0 0 24 24">

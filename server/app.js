@@ -5,7 +5,7 @@
 // (send-welcome-email, send-welcome-email-merged,
 // send-verification-email-v2, send-reset-email) with one app
 // and three routes. Exported as a plain Express app rather than
-// something already wired to listen() — api/[...path].js (the
+// something already wired to listen() — api/index.js (the
 // actual Vercel entry point) hands every /api/* request to this
 // app; nothing here needs to know it's running on Vercel.
 //
